@@ -179,14 +179,18 @@ typedef union {
     struct {
         uint8_t
             band : 4,
-            compander : 2,
-            scanlist2 : 1,
-            scanlist1 : 1;
+            compander : 2;
     };
     uint8_t __val;
 } ChannelAttributes_t;
 
 extern ChannelAttributes_t   gMR_ChannelAttributes[207];
+
+typedef struct {
+    bool ScanList[10];
+	bool ScanListLockout;
+} ChannelLists_t;
+extern ChannelLists_t    gMR_ChannelLists[MR_CHANNEL_LAST + 1];
 
 extern volatile uint16_t     gBatterySaveCountdown_10ms;
 

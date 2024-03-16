@@ -30,18 +30,31 @@
 static const uint32_t gDefaultFrequencyTable[] =
 {
 	14500000,    //
-	14550000,    //
-	43300000,    //
-	43320000,    //
-	43350000     //
+//	14550000,    // Disabled to recover EEPROM space
+//	43300000,    // Disabled to recover EEPROM space
+//	43320000,    // Disabled to recover EEPROM space
+//	43350000     // Disabled to recover EEPROM space
 };
 
+
+
+
 EEPROM_Config_t gEeprom = { 0 };
+
+
+
+// Helper for reading defaults for DTMF
+uint8_t timeDTMF(uint8_t valueDTMF, uint8_t multiplierDTMF, uint16_t maxDTMF) {
+    return (valueDTMF < 101) ? valueDTMF * multiplierDTMF : maxDTMF;
+}
+
+
+
 
 void SETTINGS_InitEEPROM(void)
 {
 	uint8_t Data[16] = {0};
-	// 0E70..0E77
+	// 0E70..0E77 - 8 bytes - Basic radio config1
 	EEPROM_ReadBuffer(0x0E70, Data, 8);
 	gEeprom.CHAN_1_CALL          = IS_MR_CHANNEL(Data[0]) ? Data[0] : MR_CHANNEL_FIRST;
 	gEeprom.SQUELCH_LEVEL        = (Data[1] < 10) ? Data[1] : 1;
@@ -56,7 +69,7 @@ void SETTINGS_InitEEPROM(void)
 	#endif
 	gEeprom.MIC_SENSITIVITY      = (Data[7] <  5) ? Data[7] : 4;
 
-	// 0E78..0E7F
+	// 0E78..0E7F - 8 bytes - Basic radio config2
 	EEPROM_ReadBuffer(0x0E78, Data, 8);
 	gEeprom.BACKLIGHT_MAX 		  = (Data[0] & 0xF) <= 10 ? (Data[0] & 0xF) : 10;
 	gEeprom.BACKLIGHT_MIN 		  = (Data[0] >> 4) < gEeprom.BACKLIGHT_MAX ? (Data[0] >> 4) : 0;
@@ -71,7 +84,7 @@ void SETTINGS_InitEEPROM(void)
 	gEeprom.TAIL_TONE_ELIMINATION = (Data[6] < 2) ? Data[6] : false;
 	gEeprom.VFO_OPEN              = (Data[7] < 2) ? Data[7] : true;
 
-	// 0E80..0E87
+	// 0E80..0E87 - 8 bytes - Basic radio config3
 	EEPROM_ReadBuffer(0x0E80, Data, 8);
 	gEeprom.ScreenChannel[0]   = IS_VALID_CHANNEL(Data[0]) ? Data[0] : (FREQ_CHANNEL_FIRST + BAND6_400MHz);
 	gEeprom.ScreenChannel[1]   = IS_VALID_CHANNEL(Data[3]) ? Data[3] : (FREQ_CHANNEL_FIRST + BAND6_400MHz);
@@ -85,7 +98,7 @@ void SETTINGS_InitEEPROM(void)
 #endif
 
 #ifdef ENABLE_FMRADIO
-	{	// 0E88..0E8F
+	{	// 0E88..0E8F - 8 bytes - FM Radio1
 		struct
 		{
 			uint16_t selFreq;
@@ -106,12 +119,12 @@ void SETTINGS_InitEEPROM(void)
 		gEeprom.FM_IsMrMode        = fmCfg.isMrMode;
 	}
 
-	// 0E40..0E67
+	// 0E40..0E67 - 40 bytes - FM Radio2
 	EEPROM_ReadBuffer(0x0E40, gFM_Channels, sizeof(gFM_Channels));
 	FM_ConfigureChannelState();
 #endif
 
-	// 0E90..0E97
+	// 0E90..0E97 - 8 bytes - Basic radio config4
 	EEPROM_ReadBuffer(0x0E90, Data, 8);
 	gEeprom.BEEP_CONTROL                 = Data[0] & 1;
 	gEeprom.KEY_M_LONG_PRESS_ACTION      = ((Data[0] >> 1) < ACTION_OPT_LEN) ? (Data[0] >> 1) : ACTION_OPT_NONE;
@@ -123,11 +136,11 @@ void SETTINGS_InitEEPROM(void)
 	gEeprom.AUTO_KEYPAD_LOCK             = (Data[6] < 2)              ? Data[6] : false;
 	gEeprom.POWER_ON_DISPLAY_MODE        = (Data[7] < 4)              ? Data[7] : POWER_ON_DISPLAY_MODE_VOLTAGE;
 
-	// 0E98..0E9F
+	// 0E98..0E9F - 8 bytes - Password
 	EEPROM_ReadBuffer(0x0E98, Data, 8);
 	memcpy(&gEeprom.POWER_ON_PASSWORD, Data, 4);
 
-	// 0EA0..0EA7
+	// 0EA0..0EA7 - 8 bytes - Basic radio config5
 	EEPROM_ReadBuffer(0x0EA0, Data, 8);
 	#ifdef ENABLE_VOICE
 	gEeprom.VOICE_PROMPT = (Data[0] < 3) ? Data[0] : VOICE_PROMPT_ENGLISH;
@@ -143,7 +156,7 @@ void SETTINGS_InitEEPROM(void)
 		}
 	#endif
 
-	// 0EA8..0EAF
+	// 0EA8..0EAF - 8 bytes - Basic radio config6
 	EEPROM_ReadBuffer(0x0EA8, Data, 8);
 	#ifdef ENABLE_ALARM
 		gEeprom.ALARM_MODE                 = (Data[0] <  2) ? Data[0] : true;
@@ -153,7 +166,7 @@ void SETTINGS_InitEEPROM(void)
 	gEeprom.TX_VFO                         = (Data[3] <  2) ? Data[3] : 0;
 	gEeprom.BATTERY_TYPE                   = (Data[4] < BATTERY_TYPE_UNKNOWN) ? Data[4] : BATTERY_TYPE_1600_MAH;
 
-	// 0ED0..0ED7
+	// 0ED0..0ED7 - 8 bytes - DTMF data1
 	EEPROM_ReadBuffer(0x0ED0, Data, 8);
 	gEeprom.DTMF_SIDE_TONE               = (Data[0] <   2) ? Data[0] : true;
 
@@ -163,18 +176,18 @@ void SETTINGS_InitEEPROM(void)
 	gEeprom.DTMF_DECODE_RESPONSE         = (Data[3] < 4) ? Data[3] : 0;
 	gEeprom.DTMF_auto_reset_time         = (Data[4] < 61 && Data[4] >= 5) ? Data[4] : 10;
 #endif
-	gEeprom.DTMF_PRELOAD_TIME            = (Data[5] < 101) ? Data[5] * 10 : 300;
-	gEeprom.DTMF_FIRST_CODE_PERSIST_TIME = (Data[6] < 101) ? Data[6] * 10 : 100;
-	gEeprom.DTMF_HASH_CODE_PERSIST_TIME  = (Data[7] < 101) ? Data[7] * 10 : 100;
+	gEeprom.DTMF_PRELOAD_TIME            = timeDTMF(Data[5],10,300);
+	gEeprom.DTMF_FIRST_CODE_PERSIST_TIME = timeDTMF(Data[6],10,100);
+	gEeprom.DTMF_HASH_CODE_PERSIST_TIME  = timeDTMF(Data[7],10,100);
 
-	// 0ED8..0EDF
+	// 0ED8..0EDF - 8 bytes - DTMF data2
 	EEPROM_ReadBuffer(0x0ED8, Data, 8);
-	gEeprom.DTMF_CODE_PERSIST_TIME  = (Data[0] < 101) ? Data[0] * 10 : 100;
-	gEeprom.DTMF_CODE_INTERVAL_TIME = (Data[1] < 101) ? Data[1] * 10 : 100;
+	gEeprom.DTMF_CODE_PERSIST_TIME  = timeDTMF(Data[0],10,100);
+	gEeprom.DTMF_CODE_INTERVAL_TIME = timeDTMF(Data[1],10,100);
 #ifdef ENABLE_DTMF_CALLING
 	gEeprom.PERMIT_REMOTE_KILL      = (Data[2] <   2) ? Data[2] : true;
 
-	// 0EE0..0EE7
+	// 0EE0..0EE7 - 8 bytes - DTMF data3
 
 	EEPROM_ReadBuffer(0x0EE0, Data, sizeof(gEeprom.ANI_DTMF_ID));
 	if (DTMF_ValidateCodes((char *)Data, sizeof(gEeprom.ANI_DTMF_ID))) {
@@ -184,7 +197,7 @@ void SETTINGS_InitEEPROM(void)
 	}
 
 
-	// 0EE8..0EEF
+	// 0EE8..0EEF - 8 bytes - DTMF data4
 	EEPROM_ReadBuffer(0x0EE8, Data, sizeof(gEeprom.KILL_CODE));
 	if (DTMF_ValidateCodes((char *)Data, sizeof(gEeprom.KILL_CODE))) {
 		memcpy(gEeprom.KILL_CODE, Data, sizeof(gEeprom.KILL_CODE));
@@ -192,7 +205,7 @@ void SETTINGS_InitEEPROM(void)
 		strcpy(gEeprom.KILL_CODE, "ABCD9");
 	}
 
-	// 0EF0..0EF7
+	// 0EF0..0EF7 - 8 bytes - DTMF data5
 	EEPROM_ReadBuffer(0x0EF0, Data, sizeof(gEeprom.REVIVE_CODE));
 	if (DTMF_ValidateCodes((char *)Data, sizeof(gEeprom.REVIVE_CODE))) {
 		memcpy(gEeprom.REVIVE_CODE, Data, sizeof(gEeprom.REVIVE_CODE));
@@ -201,7 +214,7 @@ void SETTINGS_InitEEPROM(void)
 	}
 #endif
 
-	// 0EF8..0F07
+	// 0EF8..0F07 - 16 bytes - DTMF data6
 	EEPROM_ReadBuffer(0x0EF8, Data, sizeof(gEeprom.DTMF_UP_CODE));
 	if (DTMF_ValidateCodes((char *)Data, sizeof(gEeprom.DTMF_UP_CODE))) {
 		memcpy(gEeprom.DTMF_UP_CODE, Data, sizeof(gEeprom.DTMF_UP_CODE));
@@ -209,7 +222,7 @@ void SETTINGS_InitEEPROM(void)
 		strcpy(gEeprom.DTMF_UP_CODE, "12345");
 	}
 
-	// 0F08..0F17
+	// 0F08..0F17 - 16 bytes - DTMF data7
 	EEPROM_ReadBuffer(0x0F08, Data, sizeof(gEeprom.DTMF_DOWN_CODE));
 	if (DTMF_ValidateCodes((char *)Data, sizeof(gEeprom.DTMF_DOWN_CODE))) {
 		memcpy(gEeprom.DTMF_DOWN_CODE, Data, sizeof(gEeprom.DTMF_DOWN_CODE));
@@ -217,22 +230,33 @@ void SETTINGS_InitEEPROM(void)
 		strcpy(gEeprom.DTMF_DOWN_CODE, "54321");
 	}
 
-	// 0F18..0F1F
-	EEPROM_ReadBuffer(0x0F18, Data, 8);
-	// Data[0] <4 contains 0, 1, 2 - One for each 0 = LIST1, 1 = LIST2, 2 = All CHANNELS, 3 = ALL LISTS, 4 = NO LISTS
-	gEeprom.SCAN_LIST_DEFAULT = (Data[0] < 5) ? Data[0] : 2;  // 0 = LIST1, 1 = LIST2, 2 = All CHANNELS, 3 = ALL LISTS, 4 = NO LISTS, Default = 2
-	/*
-	Why would Data[1] or [Data4] be anything other than 0 or 1? - It an on/off bool toggle
-	I can't see anywhere in the code or menus where Priority Scan is implemented
-	*/
-	gEeprom.SCAN_LIST_ENABLED[0]     = (Data[1] < 2) ? Data[1] : false; // Scanlist 1 Priority Channels Scan on/off
-	gEeprom.SCAN_LIST_ENABLED[1]     = (Data[4] < 2) ? Data[4] : false; // Scanlist 2 Priority Channels Scan on/off
-	gEeprom.SCANLIST_PRIORITY_CH1[0] =  Data[2];
-	gEeprom.SCANLIST_PRIORITY_CH1[1] =  Data[5];
-	gEeprom.SCANLIST_PRIORITY_CH2[0] =  Data[3];
-	gEeprom.SCANLIST_PRIORITY_CH2[1] =  Data[6];
+	/********************************************************************************
+		start - Read scan lists status and SCAN_ON_START to gEeprom
+	********************************************************************************/
 
-	// 0F40..0F47
+	// 0F18..0F1F - 8 bytes - ScanList data (Uses 2 bytes)
+	EEPROM_ReadBuffer(0x0F18, Data, 8); //We read the 8-bytes in from memory
+	uint8_t packed_bools = 0;
+	packed_bools = Data[0];
+	for (int i = 0; i < 8; ++i) { // Loop through each of the 8 bits in the first byte (Data[0]) and set the relevant bool
+		gEeprom.SCAN_LISTS[i] = (packed_bools >> i) & 1;
+	}
+	packed_bools = Data[1];
+	for (int i = 8; i < 10; ++i) { // Loop through the first two bits of the second byte (Data[1]) and set the relevant bool
+		gEeprom.SCAN_LISTS[i] = (packed_bools >> (i - 8)) & 1;
+	}
+	gEeprom.SCAN_ON_START = (packed_bools >> (2)) & 1; // get the 3rd bit from the second byte and set it to the SCAN_ON_START value
+	for (int i = 11; i < 16; ++i) { // get the 4th to 8th bits from the second byte (Data[1]) and set them to 0
+		gEeprom.SCAN_LISTS[i] = 0;
+	}
+
+	/********************************************************************************
+		end - Read scan lists status and STAN_ON_START to gEeprom
+	********************************************************************************/
+
+	//AUBS-NOTE: Priority channels were not being used in scan lists, and we can't easily add 1-200+bool for 10 lists in 6-bytes
+	
+	// 0F40..0F47 - 8 bytes - Basic radio config7
 	EEPROM_ReadBuffer(0x0F40, Data, 8);
 	gSetting_F_LOCK            = (Data[0] < F_LOCK_LEN) ? Data[0] : F_LOCK_DEF;
 	gSetting_350TX             = (Data[1] < 2) ? Data[1] : false;  // was true
@@ -260,7 +284,7 @@ void SETTINGS_InitEEPROM(void)
 		gEeprom.ScreenChannel[1] = gEeprom.MrChannel[1];
 	}
 
-	// 0D60..0E27
+	// 0D60..0E27 - 200 bytes - MR Channel Attributes
 	EEPROM_ReadBuffer(0x0D60, gMR_ChannelAttributes, sizeof(gMR_ChannelAttributes));
 	for(uint16_t i = 0; i < sizeof(gMR_ChannelAttributes); i++) {
 		ChannelAttributes_t *att = &gMR_ChannelAttributes[i];
@@ -270,7 +294,30 @@ void SETTINGS_InitEEPROM(void)
 		}
 	}
 
-	// 0F30..0F3F
+	/********************************************************************************
+		start - Read all channel scan lists and lockout status to gMR_ChannelLists
+	********************************************************************************/
+
+	//0x0F50+14..0x1BC0+14 AKA 0x0F5E-0x0F5F..0x1BCE-0x1BCF - 2 bytes each = 400 bytes
+	for(uint8_t curChan = 0; curChan < 200; curChan++)
+	{
+		uint16_t offset = curChan * 16;
+		uint8_t stateList[8] = {0};
+		EEPROM_ReadBuffer(0x0F58 + offset, stateList, 8);
+		for (int i = 0; i < 8; ++i) {
+			gMR_ChannelLists[curChan].ScanList[i] = (stateList[6] >> i) & 0x01;
+		}
+		for (int i = 8; i < 10; ++i) {
+			gMR_ChannelLists[curChan].ScanList[i] = (stateList[7] >> (i - 8)) & 0x01;
+		}
+		gMR_ChannelLists[curChan].ScanListLockout = (stateList[7] >> (10 - 8)) & 0x01; //Get the scan Lockout status
+	}
+
+	/********************************************************************************
+		end - Read all channel scan lists and lockout status to gMR_ChannelLists
+	********************************************************************************/
+
+	// 0F30..0F3F - 16 bytes - Custom Keys?
 	EEPROM_ReadBuffer(0x0F30, gCustomAesKey, sizeof(gCustomAesKey));
 	bHasCustomAesKey = false;
 	for (unsigned int i = 0; i < ARRAY_SIZE(gCustomAesKey); i++)
@@ -282,6 +329,9 @@ void SETTINGS_InitEEPROM(void)
 		}
 	}
 }
+
+
+
 
 void SETTINGS_LoadCalibration(void)
 {
@@ -338,6 +388,9 @@ void SETTINGS_LoadCalibration(void)
 	}
 }
 
+
+
+
 uint32_t SETTINGS_FetchChannelFrequency(const int channel)
 {
 	struct
@@ -350,6 +403,9 @@ uint32_t SETTINGS_FetchChannelFrequency(const int channel)
 
 	return info.frequency;
 }
+
+
+
 
 void SETTINGS_FetchChannelName(char *s, const int channel)
 {
@@ -377,33 +433,48 @@ void SETTINGS_FetchChannelName(char *s, const int channel)
 		s[i--] = 0;               // null term
 }
 
+
+
+
 void SETTINGS_FactoryReset(bool bIsAll)
 {
 	uint16_t i;
-	uint8_t  Template[8];
-
-	memset(Template, 0xFF, sizeof(Template));
+	uint8_t  TemplateA[8];
+	uint8_t  TemplateB[8];
+	memset(TemplateA, 0xFF, sizeof(TemplateA)); // Template to reset to 1
+	memset(TemplateB, 0x00, sizeof(TemplateB)); // Template to reset to 0 (default ScanLists for channels to off)
 
 	for (i = 0x0C80; i < 0x1E00; i += 8)
 	{
-		if (
-			!(i >= 0x0EE0 && i < 0x0F18) &&         // ANI ID + DTMF codes
-			!(i >= 0x0F30 && i < 0x0F50) &&         // AES KEY + F LOCK + Scramble Enable
-			!(i >= 0x1C00 && i < 0x1E00) &&         // DTMF contacts
-			!(i >= 0x0EB0 && i < 0x0ED0) &&         // Welcome strings
-			!(i >= 0x0EA0 && i < 0x0EA8) &&         // Voice Prompt
-			(bIsAll ||
-			(
-				!(i >= 0x0D60 && i < 0x0E28) &&     // MR Channel Attributes
-				!(i >= 0x0F18 && i < 0x0F30) &&     // Scan List
-				!(i >= 0x0F50 && i < 0x1C00) &&     // MR Channel Names
-				!(i >= 0x0E40 && i < 0x0E70) &&     // FM Channels
-				!(i >= 0x0E88 && i < 0x0E90)        // FM settings
-				))
+		//Switched it around to make it easier to read
+		if ( // If we're in any of these memory locations, we don't want to do anything.
+			(i >= 0x0EE0 && i < 0x0F18) ||         // ANI ID + DTMF codes
+			(i >= 0x0F30 && i < 0x0F50) ||         // AES KEY + F LOCK + Scramble Enable
+			(i >= 0x1C00 && i < 0x1E00) ||         // DTMF contacts
+			(i >= 0x0EB0 && i < 0x0ED0) ||         // Welcome strings
+			(i >= 0x0EA0 && i < 0x0EA8)            // Voice Prompt
+		)
+		{
+			continue;
+		}
+		if ( // If bIsAll is true to clear everything, then !bIsAll is false, list ignored, memories wiped.
+			 // IF bIsAll is false not to clear everything, then if we fall on one of the listed ranges, we 'continue'
+			!bIsAll &&
+				(
+					(i >= 0x0D60 && i < 0x0E28) ||     // MR Channel Attributes
+					(i >= 0x0F18 && i < 0x0F30) ||     // Scan List
+					(i >= 0x0F50 && i < 0x1C00) ||     // MR Channel Names
+					(i >= 0x0E40 && i < 0x0E70) ||     // FM Channels
+					(i >= 0x0E88 && i < 0x0E90)        // FM settings
+				)
 			)
 		{
-			EEPROM_WriteBuffer(i, Template);
+			continue;
 		}
+		// If we're in the second half of the 'Memory Name' location, set all bits to 0
+		if (i >= 0x0F50 && i < 0x1C00) { EEPROM_WriteBuffer(i, TemplateB);  }
+		// Otherwise, set all bits to 1
+		else { EEPROM_WriteBuffer(i, TemplateA); }
 	}
 
 	if (bIsAll)
@@ -421,6 +492,9 @@ void SETTINGS_FactoryReset(bool bIsAll)
 		}
 	}
 }
+
+
+
 
 #ifdef ENABLE_FMRADIO
 void SETTINGS_SaveFM(void)
@@ -449,6 +523,9 @@ void SETTINGS_SaveFM(void)
 	}
 #endif
 
+
+
+
 void SETTINGS_SaveVfoIndices(void)
 {
 	uint8_t State[8];
@@ -470,6 +547,41 @@ void SETTINGS_SaveVfoIndices(void)
 
 	EEPROM_WriteBuffer(0x0E80, State);
 }
+
+
+
+
+void SETTINGS_SaveActiveScanLists()
+{
+	/********************************************************************************
+		start - Write state of scan lists and SCAN_ON_START
+	********************************************************************************/
+
+	uint8_t  State[8] = {0};
+	uint8_t packed_bools;
+	packed_bools = 0;
+
+	for (int i = 0; i < 8; ++i) { // Loop through each of the first 8 bools (0-7) and set the corresponding bit in the first byte to 1 if true
+    	packed_bools |= (gEeprom.SCAN_LISTS[i] << i); // Set bit i if SCAN_LISTS[i] is true
+	}
+	State[0] = packed_bools; // List 0-7
+	packed_bools = 0;
+	for (int i = 8; i < 10; ++i) { // Loop through each of the next 2 bools (8-9) and set the corresponding bit in the second byte to 1 if true
+    	packed_bools |= (gEeprom.SCAN_LISTS[i] << (i - 8)); // Set bit i if SCAN_LISTS[i] is true
+	}
+	packed_bools |= (gEeprom.SCAN_ON_START << (2)); // set the SCAN_ON_START value to the 3rd bit in the second byte to 1 if true
+	// No need to zero out the 12th-16th bits (4-8 of the second byte) as they are already 0
+	State[1] = packed_bools; // List 8-9 and SCAN_ON_START
+
+    EEPROM_WriteBuffer(0x0F18, State); // write out the whole 8-bytes
+
+	/********************************************************************************
+		end - Write state of scan lists and SCAN_ON_START
+	********************************************************************************/
+}
+
+
+
 
 void SETTINGS_SaveSettings(void)
 {
@@ -564,15 +676,7 @@ void SETTINGS_SaveSettings(void)
 #endif
 	EEPROM_WriteBuffer(0x0ED8, State);
 
-	State[0] = gEeprom.SCAN_LIST_DEFAULT;
-	State[1] = gEeprom.SCAN_LIST_ENABLED[0];
-	State[2] = gEeprom.SCANLIST_PRIORITY_CH1[0];
-	State[3] = gEeprom.SCANLIST_PRIORITY_CH2[0];
-	State[4] = gEeprom.SCAN_LIST_ENABLED[1];
-	State[5] = gEeprom.SCANLIST_PRIORITY_CH1[1];
-	State[6] = gEeprom.SCANLIST_PRIORITY_CH2[1];
-	State[7] = 0xFF;
-	EEPROM_WriteBuffer(0x0F18, State);
+	SETTINGS_SaveActiveScanLists();
 
 	memset(State, 0xFF, sizeof(State));
 	State[0]  = gSetting_F_LOCK;
@@ -597,6 +701,9 @@ void SETTINGS_SaveSettings(void)
 
 	EEPROM_WriteBuffer(0x0F40, State);
 }
+
+
+
 
 void SETTINGS_SaveChannel(uint8_t Channel, uint8_t VFO, const VFO_Info_t *pVFO, uint8_t Mode)
 {
@@ -632,7 +739,7 @@ void SETTINGS_SaveChannel(uint8_t Channel, uint8_t VFO, const VFO_Info_t *pVFO, 
 			| (pVFO->CHANNEL_BANDWIDTH << 1)
 			| (pVFO->FrequencyReverse  << 0);
 		State._8[5] = ((pVFO->DTMF_PTT_ID_TX_MODE & 7u) << 1)
-#ifdef ENABLE_DTMF_CALLING
+#ifdef ENABLE_DTMF_CALLING 
 			| ((pVFO->DTMF_DECODING_ENABLE & 1u) << 0)
 #endif
 		;
@@ -656,6 +763,9 @@ void SETTINGS_SaveChannel(uint8_t Channel, uint8_t VFO, const VFO_Info_t *pVFO, 
 
 }
 
+
+
+
 void SETTINGS_SaveBatteryCalibration(const uint16_t * batteryCalibration)
 {
 	uint16_t buf[4];
@@ -666,14 +776,49 @@ void SETTINGS_SaveBatteryCalibration(const uint16_t * batteryCalibration)
 	EEPROM_WriteBuffer(0x1F48, buf);
 }
 
+
+
+
+void SETTINGS_SaveChannelScanLists(uint8_t channel,bool keep)
+{
+	//0x0F50+14..0x1BC0+14 AKA 0x0F5E-0x0F5F..0x1BCE-0x1BCF - 2 bytes each = 400 bytes
+	// Pack the Channel's Lists into packed_bools for inclusion into the last two bytes of the 16-bytes the Channel Name occupies
+	// Write in 8-byte chunks, so need to read the second 8-bytes containing the end of the channel name and last 2-bttes containing the lists
+	uint8_t  stateScanList[8] = {0};
+	uint16_t offsetScanLists = 0x0F58 + (channel * 16);
+	EEPROM_ReadBuffer(offsetScanLists, stateScanList, sizeof(stateScanList));
+
+	uint8_t packed_bools = 0;  // Set the all bytes to 0, so everything is off
+		if (keep) // As long as we're not clearing the list
+	{
+		// Loop through each of the first 8 bools (0-7) and set the corresponding bit in the first byte to 1 if true (enabled)
+		for (int i = 0; i < 8; ++i) { packed_bools |= (gMR_ChannelLists[channel].ScanList[i] << i); }
+		stateScanList[6] = packed_bools; // Byte 7
+		packed_bools = 0;   // Set the all bytes to 0, so everything is off
+		// Loop through each of the next 2 bools (8-9) and set the first two bits in the second byte to 1 if true (enabled)
+		for (int i = 8; i < 10; ++i) { packed_bools |= (gMR_ChannelLists[channel].ScanList[i] << (i - 8)); }
+		packed_bools |= (gMR_ChannelLists[channel].ScanListLockout << (2)); // Set the 3rd bit if the channel is locked out
+		stateScanList[7] = packed_bools;  // Byte 8
+	}
+
+	EEPROM_WriteBuffer(offsetScanLists, stateScanList); // write out the whole 8-bytes 
+}
+
+
+
+
 void SETTINGS_SaveChannelName(uint8_t channel, const char * name)
 {
 	uint16_t offset = channel * 16;
-	uint8_t buf[16] = {0};
+	uint8_t buf[10] = {0};  // The radio only uses 10 character names, so no need to use all 16 bytes.  10 is enough.
 	memcpy(buf, name, MIN(strlen(name), 10u));
 	EEPROM_WriteBuffer(0x0F50 + offset, buf);
 	EEPROM_WriteBuffer(0x0F58 + offset, buf + 8);
+	SETTINGS_SaveChannelScanLists(channel, true); //Write in 8-byte chunks, so just overwritten the channel's ScanList info.  Re-populate them.
 }
+
+
+
 
 void SETTINGS_UpdateChannel(uint8_t channel, const VFO_Info_t *pVFO, bool keep)
 {
@@ -685,40 +830,39 @@ void SETTINGS_UpdateChannel(uint8_t channel, const VFO_Info_t *pVFO, bool keep)
 		ChannelAttributes_t  att = {
 			.band = 0xf,
 			.compander = 0,
-			.scanlist1 = 0,
-			.scanlist2 = 0,
 			};        // default attributes
 
 		uint16_t offset = 0x0D60 + (channel & ~7u);
 		EEPROM_ReadBuffer(offset, state, sizeof(state));
 
-		if (keep) {
+		if (keep) { // Keep the channel
 			att.band = pVFO->Band;
-			att.scanlist1 = pVFO->SCANLIST1_PARTICIPATION;
-			att.scanlist2 = pVFO->SCANLIST2_PARTICIPATION;
 			att.compander = pVFO->Compander;
 			if (state[channel & 7u] == att.__val)
 				return; // no change in the attributes
 		}
+		else { 
+			if (IS_MR_CHANNEL(channel)) { // if it's a memory channel
+				// clear/reset the channel name
+				SETTINGS_SaveChannelName(channel, "");
+			}
+		}
+		SETTINGS_SaveChannelScanLists(channel, keep);
 
 		state[channel & 7u] = att.__val;
 		EEPROM_WriteBuffer(offset, state);
 
 		gMR_ChannelAttributes[channel] = att;
-
-		if (IS_MR_CHANNEL(channel)) {	// it's a memory channel
-			if (!keep) {
-				// clear/reset the channel name
-				SETTINGS_SaveChannelName(channel, "");
-			}
-		}
 	}
 }
+
+
+
 
 void SETTINGS_WriteBuildOptions(void)
 {
 	uint8_t buf[8] = {0};
-buf[0] = 0
+	buf[0] = 0
 #ifdef ENABLE_FMRADIO
     | (1 << 0)
 #endif

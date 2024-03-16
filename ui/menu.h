@@ -63,8 +63,9 @@ enum
 #endif
 	MENU_SC_REV,
 	MENU_AUTOLK,
-	MENU_S_ADD1,
-	MENU_S_ADD2,
+	MENU_S_ADD,
+	MENU_SCN_LOCKOUT,
+	MENU_SCN_START,
 	MENU_STE,
 	MENU_RP_STE,
 	MENU_MIC,
@@ -73,9 +74,16 @@ enum
 #endif
 	MENU_COMPAND,
 	MENU_1_CALL,
-	MENU_S_LIST,
+	MENU_SLIST0,
 	MENU_SLIST1,
 	MENU_SLIST2,
+	MENU_SLIST3,
+	MENU_SLIST4,
+	MENU_SLIST5,
+	MENU_SLIST6,
+	MENU_SLIST7,
+	MENU_SLIST8,
+	MENU_SLIST9,
 #ifdef ENABLE_ALARM
 	MENU_AL_MOD,
 #endif
@@ -162,13 +170,13 @@ extern const char        gSubMenu_SCRAMBLER[11][7];
 typedef struct {char* name; uint8_t id;} t_sidefunction;
 extern const uint8_t 		 gSubMenu_SIDEFUNCTIONS_size;
 extern const t_sidefunction gSubMenu_SIDEFUNCTIONS[];
-				         
+
 extern bool              gIsInSubMenu;
-				         
+
 extern uint8_t           gMenuCursor;
 
 extern int32_t           gSubMenuSelection;
-				         
+
 extern char              edit_original[17];
 extern char              edit[17];
 extern int               edit_index;
@@ -176,5 +184,8 @@ extern int               edit_index;
 void UI_DisplayMenu(void);
 int UI_MENU_GetCurrentMenuId();
 uint8_t UI_MENU_GetMenuIdx(uint8_t id);
+
+char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar);	// declaration, function in ui/menu.c
+void UI_GetScanListInfo();											// declaration, function in ui/menu.c
 
 #endif

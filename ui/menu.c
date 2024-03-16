@@ -53,15 +53,23 @@ const t_menu_item MenuList[] =
 	{"BusyCL", VOICE_ID_BUSY_LOCKOUT,                  MENU_BCL           }, // was "BCL"
 	{"Compnd", VOICE_ID_INVALID,                       MENU_COMPAND       },
 	{"Demodu", VOICE_ID_INVALID,                       MENU_AM            }, // was "AM"
-	{"ScAdd1", VOICE_ID_INVALID,                       MENU_S_ADD1        },
-	{"ScAdd2", VOICE_ID_INVALID,                       MENU_S_ADD2        },
+	{"ScnAdd", VOICE_ID_INVALID,                       MENU_S_ADD         },
+	{"ScnLkO", VOICE_ID_INVALID,                       MENU_SCN_LOCKOUT   },
+	{"ScnSrt", VOICE_ID_INVALID,                       MENU_SCN_START     },
 	{"ChSave", VOICE_ID_MEMORY_CHANNEL,                MENU_MEM_CH        }, // was "MEM-CH"
 	{"ChDele", VOICE_ID_DELETE_CHANNEL,                MENU_DEL_CH        }, // was "DEL-CH"
 	{"ChName", VOICE_ID_INVALID,                       MENU_MEM_NAME      },
 
-	{"SList",  VOICE_ID_INVALID,                       MENU_S_LIST        },
+	{"SList0", VOICE_ID_INVALID,                       MENU_SLIST0        },
 	{"SList1", VOICE_ID_INVALID,                       MENU_SLIST1        },
 	{"SList2", VOICE_ID_INVALID,                       MENU_SLIST2        },
+	{"SList3", VOICE_ID_INVALID,                       MENU_SLIST3        },
+	{"SList4", VOICE_ID_INVALID,                       MENU_SLIST4        },
+	{"SList5", VOICE_ID_INVALID,                       MENU_SLIST5        },
+	{"SList6", VOICE_ID_INVALID,                       MENU_SLIST6        },
+	{"SList7", VOICE_ID_INVALID,                       MENU_SLIST7        },
+	{"SList8", VOICE_ID_INVALID,                       MENU_SLIST8        },
+	{"SList9", VOICE_ID_INVALID,                       MENU_SLIST9        },
 	{"ScnRev", VOICE_ID_INVALID,                       MENU_SC_REV        },
 #ifdef ENABLE_NOAA
 	{"NOAA-S", VOICE_ID_INVALID,                       MENU_NOAA_S        },
@@ -393,6 +401,9 @@ char    edit_original[17]; // a copy of the text before editing so that we can e
 char    edit[17];
 int     edit_index;
 
+
+
+
 void UI_DisplayMenu(void)
 {
 	const unsigned int menu_list_width = 6; // max no. of characters on the menu list (left side)
@@ -485,8 +496,8 @@ void UI_DisplayMenu(void)
 	bool already_printed = false;
 
 	/* Brightness is set to max in some entries of this menu. Return it to the configured brightness
-	   level the "next" time we enter here.I.e., when we move from one menu to another.
-	   It also has to be set back to max when pressing the Exit key. */
+		level the "next" time we enter here.I.e., when we move from one menu to another.
+		It also has to be set back to max when pressing the Exit key. */
 
 	BACKLIGHT_TurnOn();
 
@@ -617,8 +628,6 @@ void UI_DisplayMenu(void)
 		#endif
 		case MENU_BCL:
 		case MENU_BEEP:
-		case MENU_S_ADD1:
-		case MENU_S_ADD2:
 		case MENU_STE:
 		case MENU_D_ST:
 #ifdef ENABLE_DTMF_CALLING
@@ -633,14 +642,20 @@ void UI_DisplayMenu(void)
 		case MENU_500TX:
 		case MENU_350EN:
 		case MENU_SCREN:
+		case MENU_SCN_START:
+		case MENU_SCN_LOCKOUT:
 			strcpy(String, gSubMenu_OFF_ON[gSubMenuSelection]);
 			break;
-
+		case MENU_S_ADD:{
+			UI_GetScanListInfo();
+			already_printed = true;
+			break;
+		}
 		case MENU_MEM_CH:
 		case MENU_1_CALL:
 		case MENU_DEL_CH:
 		{
-			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 0);
+			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 10);
 
 			UI_GenerateChannelStringEx(String, valid, gSubMenuSelection);
 			UI_PrintString(String, menu_item_x1, menu_item_x2, 0, 8);
@@ -660,7 +675,7 @@ void UI_DisplayMenu(void)
 
 		case MENU_MEM_NAME:
 		{
-			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 0);
+			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 10);
 
 			UI_GenerateChannelStringEx(String, valid, gSubMenuSelection);
 			UI_PrintString(String, menu_item_x1, menu_item_x2, 0, 8);
@@ -724,29 +739,6 @@ void UI_DisplayMenu(void)
 				strcpy(String, "OFF");
 			else
 				sprintf(String, "%d*100ms", gSubMenuSelection);
-			break;
-
-		case MENU_S_LIST:
-			switch (gSubMenuSelection)
-			{
-				case 0:
-					strcpy(String, "LIST1");
-					break;
-				case 1:
-					strcpy(String, "LIST2");
-					break;			
-				case 2:
-					strcpy(String, "ALL\nCHANNELS");
-					break;
-				case 3:
-					strcpy(String, "ALL\nLISTS");
-					break;
-				case 4:
-					strcpy(String, "NO\nLISTS");
-					break;
-				default:
-					break;
-			}
 			break;
 
 		#ifdef ENABLE_ALARM
@@ -914,14 +906,15 @@ void UI_DisplayMenu(void)
 		}
 	}
 
-	if (UI_MENU_GetCurrentMenuId() == MENU_SLIST1 || UI_MENU_GetCurrentMenuId() == MENU_SLIST2)
+	if (UI_MENU_GetCurrentMenuId() >= MENU_SLIST0 && UI_MENU_GetCurrentMenuId() <= MENU_SLIST9)
 	{
-		i = (UI_MENU_GetCurrentMenuId() == MENU_SLIST1) ? 0 : 1;
 		char *pPrintStr = String;
-
-		if (gSubMenuSelection < 0) {
+		if (gSubMenuSelection < 0)
+		{
 			pPrintStr = "NULL";
-		} else {
+		}
+		else
+		{
 			UI_GenerateChannelStringEx(String, true, gSubMenuSelection);
 			pPrintStr = String;
 		}
@@ -933,20 +926,13 @@ void UI_DisplayMenu(void)
 		pPrintStr = String[0] ? String : "--";
 
 		// channel name and scan-list
-		if (gSubMenuSelection < 0 || !gEeprom.SCAN_LIST_ENABLED[i]) {
+		if (gSubMenuSelection < 0)
+		{
 			UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 2, 8);
-		} else {
+		}
+		else
+		{
 			UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 2);
-
-			if (IS_MR_CHANNEL(gEeprom.SCANLIST_PRIORITY_CH1[i])) {
-				sprintf(String, "PRI%d:%u", 1, gEeprom.SCANLIST_PRIORITY_CH1[i] + 1);
-				UI_PrintString(String, menu_item_x1, menu_item_x2, 3, 8);
-			}
-
-			if (IS_MR_CHANNEL(gEeprom.SCANLIST_PRIORITY_CH2[i])) {
-				sprintf(String, "PRI%d:%u", 2, gEeprom.SCANLIST_PRIORITY_CH2[i] + 1);
-				UI_PrintString(String, menu_item_x1, menu_item_x2, 5, 8);
-			}
 		}
 	}
 
@@ -963,11 +949,11 @@ void UI_DisplayMenu(void)
 #endif
 
 	if (UI_MENU_GetCurrentMenuId() == MENU_R_CTCS ||
-	    UI_MENU_GetCurrentMenuId() == MENU_T_CTCS ||
-	    UI_MENU_GetCurrentMenuId() == MENU_R_DCS  ||
-	    UI_MENU_GetCurrentMenuId() == MENU_T_DCS
+		UI_MENU_GetCurrentMenuId() == MENU_T_CTCS ||
+		UI_MENU_GetCurrentMenuId() == MENU_R_DCS  ||
+		UI_MENU_GetCurrentMenuId() == MENU_T_DCS
 #ifdef ENABLE_DTMF_CALLING
-	    || UI_MENU_GetCurrentMenuId() == MENU_D_LIST
+		|| UI_MENU_GetCurrentMenuId() == MENU_D_LIST
 #endif
 	) {
 		sprintf(String, "%2d", gSubMenuSelection);
@@ -975,9 +961,9 @@ void UI_DisplayMenu(void)
 	}
 
 	if ((UI_MENU_GetCurrentMenuId() == MENU_RESET    ||
-	     UI_MENU_GetCurrentMenuId() == MENU_MEM_CH   ||
-	     UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME ||
-	     UI_MENU_GetCurrentMenuId() == MENU_DEL_CH) && gAskForConfirmation)
+		UI_MENU_GetCurrentMenuId() == MENU_MEM_CH   ||
+		UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME ||
+		UI_MENU_GetCurrentMenuId() == MENU_DEL_CH) && gAskForConfirmation)
 	{	// display confirmation
 		char *pPrintStr = (gAskForConfirmation == 1) ? "SURE?" : "WAIT!";
 		UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 5, 8);
@@ -985,3 +971,38 @@ void UI_DisplayMenu(void)
 
 	ST7565_BlitFullScreen();
 }
+
+
+
+
+// Inline function to convert a positive single-digit integer to a character
+inline char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar) {
+	if (num <= 9) {
+		return num + '0';
+	} else {
+		return OutOfRangeReturnChar; // Handle out-of-range input (return the specified character)
+	}
+}
+
+
+
+// Extract Lists assigned to the current channel
+void UI_GetScanListInfo()
+{
+	char listText[11];
+	memset(listText, '\0', sizeof(listText));					    // Clear out everything in the listText array
+	for (uint8_t i = 0; i < 10; ++i) {
+		if (gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[i]) {	// Check if the list is on
+			listText[i] = UI_ConvertintToChar(i,'-');				// Set position i to be the number of the list [List is on] (return a hyphen '-' if it's out of range)
+		} else {
+			listText[i] = '_';									    // Set position i to be an underscore [List is off]
+		}
+	}
+	/*
+	 * menu_list_width = 6;
+	 * menu_item_x1    = (8 * menu_list_width) + 2;	== (8*6)+2	= 48
+	 * int menu_item_x2    = LCD_WIDTH - 1;			== 128		= 127
+	 */
+	UI_PrintString(listText, 48, 127, 1, 8);					    // Print/Re-print the list to screen in the menu
+}
+

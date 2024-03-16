@@ -15,6 +15,8 @@
  */
 
 #include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #if !defined(ENABLE_OVERLAY)
 	#include "ARMCM0.h"
@@ -42,11 +44,18 @@
 #include "ui/menu.h"
 #include "ui/ui.h"
 
+#include "ui/helper.h"
+#include "driver/system.h"
+#include "../external/printf/printf.h"
+
 #ifndef ARRAY_SIZE
 	#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
 
 uint8_t gUnlockAllTxConfCnt;
+
+
+
 
 #ifdef ENABLE_F_CAL_MENU
 	void writeXtalFreqCal(const int32_t value, const bool update_eeprom)
@@ -76,6 +85,9 @@ uint8_t gUnlockAllTxConfCnt;
 	}
 #endif
 
+
+
+
 void MENU_StartCssScan(void)
 {
 	SCANNER_Start(true);
@@ -84,6 +96,9 @@ void MENU_StartCssScan(void)
 
 	gRequestDisplayScreen = DISPLAY_MENU;
 }
+
+
+
 
 void MENU_CssScanFound(void)
 {
@@ -100,6 +115,9 @@ void MENU_CssScanFound(void)
 	gUpdateDisplay = true;
 }
 
+
+
+
 void MENU_StopCssScan(void)
 {
 	gCssBackgroundScan = false;
@@ -110,6 +128,9 @@ void MENU_StopCssScan(void)
 	gUpdateDisplay = true;
 	gUpdateStatus = true;
 }
+
+
+
 
 int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 {
@@ -232,8 +253,6 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 		case MENU_BCL:
 		case MENU_BEEP:
 		case MENU_AUTOLK:
-		case MENU_S_ADD1:
-		case MENU_S_ADD2:
 		case MENU_STE:
 		case MENU_D_ST:
 #ifdef ENABLE_DTMF_CALLING
@@ -248,15 +267,19 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 		case MENU_500TX:
 		case MENU_350EN:
 		case MENU_SCREN:
+		case MENU_SCN_START:
+		case MENU_SCN_LOCKOUT:
 			*pMin = 0;
 			*pMax = ARRAY_SIZE(gSubMenu_OFF_ON) - 1;
 			break;
-
+		case MENU_S_ADD:
+			*pMin = 0;
+			*pMax = 0;
+			break;
 		case MENU_AM:
 			*pMin = 0;
 			*pMax = ARRAY_SIZE(gModulationStr) - 1;
 			break;
-
 		case MENU_SCR:
 			*pMin = 0;
 			*pMax = ARRAY_SIZE(gSubMenu_SCRAMBLER) - 1;
@@ -283,8 +306,16 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 			*pMax = MR_CHANNEL_LAST;
 			break;
 
+		case MENU_SLIST0:
 		case MENU_SLIST1:
 		case MENU_SLIST2:
+		case MENU_SLIST3:
+		case MENU_SLIST4:
+		case MENU_SLIST5:
+		case MENU_SLIST6:
+		case MENU_SLIST7:
+		case MENU_SLIST8:
+		case MENU_SLIST9:
 			*pMin = -1;
 			*pMax = MR_CHANNEL_LAST;
 			break;
@@ -295,11 +326,6 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 			break;
 
 		case MENU_MIC:
-			*pMin = 0;
-			*pMax = 4;
-			break;
-
-		case MENU_S_LIST:
 			*pMin = 0;
 			*pMax = 4;
 			break;
@@ -369,6 +395,9 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 
 	return 0;
 }
+
+
+
 
 void MENU_AcceptSetting(void)
 {
@@ -573,19 +602,16 @@ void MENU_AcceptSetting(void)
 			gKeyLockCountdown        = 30;
 			break;
 
-		case MENU_S_ADD1:
-			gTxVfo->SCANLIST1_PARTICIPATION = gSubMenuSelection;
-			SETTINGS_UpdateChannel(gTxVfo->CHANNEL_SAVE, gTxVfo, true);
-			gVfoConfigureMode = VFO_CONFIGURE;
-			gFlagResetVfos    = true;
-			return;
+		case MENU_S_ADD:
+			break;
+		case MENU_SCN_LOCKOUT:
+			gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanListLockout = gSubMenuSelection;
+			SETTINGS_SaveChannelScanLists(gTxVfo->CHANNEL_SAVE, true);							// Save channel lists
+			break;
 
-		case MENU_S_ADD2:
-			gTxVfo->SCANLIST2_PARTICIPATION = gSubMenuSelection;
-			SETTINGS_UpdateChannel(gTxVfo->CHANNEL_SAVE, gTxVfo, true);
-			gVfoConfigureMode = VFO_CONFIGURE;
-			gFlagResetVfos    = true;
-			return;
+		case MENU_SCN_START:
+			gEeprom.SCAN_ON_START = gSubMenuSelection;
+			break;
 
 		case MENU_STE:
 			gEeprom.TAIL_TONE_ELIMINATION = gSubMenuSelection;
@@ -617,10 +643,6 @@ void MENU_AcceptSetting(void)
 
 		case MENU_1_CALL:
 			gEeprom.CHAN_1_CALL = gSubMenuSelection;
-			break;
-
-		case MENU_S_LIST:
-			gEeprom.SCAN_LIST_DEFAULT = gSubMenuSelection;
 			break;
 
 		#ifdef ENABLE_ALARM
@@ -802,6 +824,9 @@ void MENU_AcceptSetting(void)
 	gRequestSaveSettings = true;
 }
 
+
+
+
 static void MENU_ClampSelection(int8_t Direction)
 {
 	int32_t Min;
@@ -816,6 +841,9 @@ static void MENU_ClampSelection(int8_t Direction)
 		gSubMenuSelection = NUMBER_AddWithWraparound(Selection, Direction, Min, Max);
 	}
 }
+
+
+
 
 void MENU_ShowCurrentSetting(void)
 {
@@ -976,14 +1004,16 @@ void MENU_ShowCurrentSetting(void)
 			gSubMenuSelection = gEeprom.AUTO_KEYPAD_LOCK;
 			break;
 
-		case MENU_S_ADD1:
-			gSubMenuSelection = gTxVfo->SCANLIST1_PARTICIPATION;
+		case MENU_S_ADD:{
+				UI_GetScanListInfo();
+			}
 			break;
-
-		case MENU_S_ADD2:
-			gSubMenuSelection = gTxVfo->SCANLIST2_PARTICIPATION;
+		case MENU_SCN_LOCKOUT:
+			gSubMenuSelection = gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanListLockout;
 			break;
-
+		case MENU_SCN_START:
+			gSubMenuSelection = gEeprom.SCAN_ON_START;
+			break;
 		case MENU_STE:
 			gSubMenuSelection = gEeprom.TAIL_TONE_ELIMINATION;
 			break;
@@ -1010,16 +1040,17 @@ void MENU_ShowCurrentSetting(void)
 			gSubMenuSelection = gEeprom.CHAN_1_CALL;
 			break;
 
-		case MENU_S_LIST:
-			gSubMenuSelection = gEeprom.SCAN_LIST_DEFAULT;
-			break;
-
+		case MENU_SLIST0:
 		case MENU_SLIST1:
-			gSubMenuSelection = RADIO_FindNextChannel(0, 1, true, 0);
-			break;
-
 		case MENU_SLIST2:
-			gSubMenuSelection = RADIO_FindNextChannel(0, 1, true, 1);
+		case MENU_SLIST3:
+		case MENU_SLIST4:
+		case MENU_SLIST5:
+		case MENU_SLIST6:
+		case MENU_SLIST7:
+		case MENU_SLIST8:
+		case MENU_SLIST9:
+			gSubMenuSelection = RADIO_FindNextChannel(0, 1, true, (UI_MENU_GetCurrentMenuId() - MENU_SLIST0));
 			break;
 
 		#ifdef ENABLE_ALARM
@@ -1093,7 +1124,7 @@ void MENU_ShowCurrentSetting(void)
 			#if 0
 				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[0], 1, false, 1);
 			#else
-				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[gEeprom.TX_VFO], 1, false, 1);
+				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[gEeprom.TX_VFO], 1, false, 10);
 			#endif
 			break;
 
@@ -1164,6 +1195,9 @@ void MENU_ShowCurrentSetting(void)
 	}
 }
 
+
+
+
 static void MENU_Key_0_to_9(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 {
 	uint8_t  Offset;
@@ -1195,6 +1229,15 @@ static void MENU_Key_0_to_9(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 			}
 		}
 
+		return;
+	}
+
+	if (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_S_ADD)
+	{	// currently on the channel's Lists
+		
+		gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[Key] = !gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[Key];	// Toggle the List for the channel in memory 
+		UI_MENU_ScanLists();
+		UI_GetScanListInfo();
 		return;
 	}
 
@@ -1330,6 +1373,9 @@ static void MENU_Key_0_to_9(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 	gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
 }
 
+
+
+
 static void MENU_Key_EXIT(bool bKeyPressed, bool bKeyHeld)
 {
 	if (bKeyHeld || !bKeyPressed)
@@ -1390,6 +1436,9 @@ static void MENU_Key_EXIT(bool bKeyPressed, bool bKeyHeld)
 	gPttWasReleased = true;
 }
 
+
+
+
 static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 {
 	if (bKeyHeld || !bKeyPressed)
@@ -1413,7 +1462,7 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
             return;
 		#if 1
 			if (UI_MENU_GetCurrentMenuId() == MENU_DEL_CH || UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME)
-				if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 0))
+				if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 10))
 					return;  // invalid channel
 		#endif
 
@@ -1433,7 +1482,7 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 	{
 		if (edit_index < 0)
 		{	// enter channel name edit mode
-			if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 0))
+			if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 10))
 				return;
 
 			SETTINGS_FetchChannelName(edit, gSubMenuSelection);
@@ -1527,6 +1576,9 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 	gInputBoxIndex = 0;
 }
 
+
+
+
 static void MENU_Key_STAR(const bool bKeyPressed, const bool bKeyHeld)
 {
 	if (bKeyHeld || !bKeyPressed)
@@ -1576,9 +1628,12 @@ static void MENU_Key_STAR(const bool bKeyPressed, const bool bKeyHeld)
 	gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
 }
 
+
+
+
 static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 {
-	uint8_t VFO;
+	uint8_t ScanList = 10;
 	uint8_t Channel;
 	bool    bCheckScanList;
 
@@ -1656,7 +1711,6 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 		return;
 	}
 
-	VFO = 0;
 
 	switch (UI_MENU_GetCurrentMenuId())
 	{
@@ -1666,10 +1720,17 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 			bCheckScanList = false;
 			break;
 
-		case MENU_SLIST2:
-			VFO = 1;
-			[[fallthrough]];
+		case MENU_SLIST0:
 		case MENU_SLIST1:
+		case MENU_SLIST2:
+		case MENU_SLIST3:
+		case MENU_SLIST4:
+		case MENU_SLIST5:
+		case MENU_SLIST6:
+		case MENU_SLIST7:
+		case MENU_SLIST8:
+		case MENU_SLIST9:
+			ScanList = (UI_MENU_GetCurrentMenuId() - MENU_SLIST0);
 			bCheckScanList = true;
 			break;
 
@@ -1679,12 +1740,15 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 			return;
 	}
 
-	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, bCheckScanList, VFO);
+	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, bCheckScanList, ScanList);
 	if (Channel != 0xFF)
 		gSubMenuSelection = Channel;
 
 	gRequestDisplayScreen = DISPLAY_MENU;
 }
+
+
+
 
 void MENU_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 {
@@ -1753,7 +1817,7 @@ void MENU_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 		if (UI_MENU_GetCurrentMenuId() == MENU_VOL ||
 			#ifdef ENABLE_F_CAL_MENU
 				UI_MENU_GetCurrentMenuId() == MENU_F_CALI ||
-		    #endif
+			#endif
 			UI_MENU_GetCurrentMenuId() == MENU_BATCAL)
 		{
 			gMenuCountdown = menu_timeout_long_500ms;
@@ -1763,4 +1827,19 @@ void MENU_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 			gMenuCountdown = menu_timeout_500ms;
 		}
 	}
+}
+
+/*
+ * Process the Scan List information, either to Display in the menu screen, or when Accepting (saving) in the menu
+ * Provide a pointer to fill for Displaying, or set it to NULL for Accepting
+ */
+void UI_MENU_ScanLists()
+{
+	for (uint8_t i = 0; i < 10; ++i) {
+		if (edit[i] >= '0' && edit[i] <= '9') {										    // Check the character is a number between 0 and 9
+			unsigned int CurrentListNumber = edit[i] - '0';						    	// Convert character to an integer
+			gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[CurrentListNumber] = true;	// Set the corresponding element in Lists to true
+		}
+	}
+	SETTINGS_SaveChannelScanLists(gTxVfo->CHANNEL_SAVE, true);							// Save channel lists
 }
