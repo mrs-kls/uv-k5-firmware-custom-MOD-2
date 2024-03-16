@@ -33,7 +33,6 @@ enum {
 	BANDWIDTH_NARROW
 };
 
-
 enum PTT_ID_t {
 	PTT_ID_OFF = 0,    // OFF
 	PTT_ID_TX_UP,      // BEGIN OF TX

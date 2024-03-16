@@ -225,7 +225,6 @@ void ACTION_Scan(bool bRestart)
 #endif
 			return;
 		}
-
 		// jump to the next channel
 		CHFRSCANNER_Start(false, gScanStateDir);
 		gScanPauseDelayIn_10ms = 1;

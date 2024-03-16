@@ -80,9 +80,7 @@ bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t ScanL
 			return true;
 		}
 	}
-
 	return false; // It's not a valid channel
-
 }
 
 
