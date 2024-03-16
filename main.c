@@ -50,7 +50,7 @@
 #include "ui/welcome.h"
 #include "ui/menu.h"
 
-#include "app\chFrScanner.h"
+#include "app/chFrScanner.h"
 
 
 
