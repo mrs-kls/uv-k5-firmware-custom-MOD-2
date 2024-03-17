@@ -28,7 +28,7 @@ NOTE: This README has only barely been updated from the original Egzumer version
 * When scanning, the ScanLists now show along the top of the screen
 * Toggling ScanLists on/off is as simple as pressing the number
 * Memory channels can now be excluded (Lockout/Skip) from scanning
-* Temporarily exlude channels while scanning, pressing `*` will lock out the channel until a powercycle
+* Memory channels can now be temporarily excluded while scanning (press `*` will lock out the channel until a power cycle)
 * Scanning can be set to automatically start when the radio is turned on
 * All the changes can be managed through CHIRP
 * When factory resetting, it will only create ONE new channel instead of the original 5
