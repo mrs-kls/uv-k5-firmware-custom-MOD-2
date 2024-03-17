@@ -311,7 +311,15 @@ void SETTINGS_InitEEPROM(void)
 			gMR_ChannelLists[curChan].ScanList[i] = (stateList[7] >> (i - 8)) & 0x01;
 		}
 		gMR_ChannelLists[curChan].ScanListLockout = (stateList[7] >> (10 - 8)) & 0x01; //Get the scan Lockout status
+		gMR_ChannelLists[curChan].ScanListTempLockout = false; // Set the TempLockout status to false 
 	}
+
+	/*
+	 * NOTE:
+	 * gMR_ChannelLists[x].ScanList[0]..[9] are used used for the 10 scanlists.
+	 * gMR_ChannelLists[x].ScanListLockout is for permanent LockOut
+	 * gMR_ChannelLists[x].ScanListTempLockout is for temporary LockOut until radio is turned off/on
+	*/
 
 	/********************************************************************************
 		end - Read all channel scan lists and lockout status to gMR_ChannelLists

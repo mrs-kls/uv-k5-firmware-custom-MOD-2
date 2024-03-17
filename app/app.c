@@ -1706,13 +1706,19 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 		}
 	}
 
+	if (Key == KEY_STAR && bKeyPressed && gScanStateDir != SCAN_OFF) // Memory Channel Scanning and star key pressed
+	{
+		gMR_ChannelLists[gNextMrChannel].ScanListTempLockout = true; // Set the temp lockout
+		FlashLED(2,false); // Flash red LED twice
+		CHFRSCANNER_ContinueScanning(); // Continue scanning because we don't want to be on the channel we've locked out
+		return;
+	}
+
 	if (Key <= KEY_9 && bKeyPressed && gScanStateDir != SCAN_OFF) // Memory Channel Scanning, so toggle the scan list and save
 	{
 		gEeprom.SCAN_LISTS[Key] = !gEeprom.SCAN_LISTS[Key];
 		SETTINGS_SaveActiveScanLists();
-		BK4819_ToggleGpioOut(((gEeprom.SCAN_LISTS[Key])?BK4819_GPIO6_PIN2_GREEN:BK4819_GPIO5_PIN1_RED), true);
-		SYSTEM_DelayMs(100);
-		BK4819_ToggleGpioOut(((gEeprom.SCAN_LISTS[Key])?BK4819_GPIO6_PIN2_GREEN:BK4819_GPIO5_PIN1_RED), false);
+		FlashLED(1,gEeprom.SCAN_LISTS[Key]);
 		return;
 	}
 
@@ -1959,4 +1965,18 @@ Skip:
 	gRequestDisplayScreen = DISPLAY_INVALID;
 
 	gUpdateDisplay = true;
+}
+
+// Flash the RedGreen (false=red,true=green) LED FlashCount times
+void FlashLED(uint8_t FlashCount, bool RedGreen)
+{
+BK4819_ToggleGpioOut(BK4819_GPIO6_PIN2_GREEN, false);
+BK4819_ToggleGpioOut(BK4819_GPIO5_PIN1_RED, false);
+	for (uint8_t i = 0; i<FlashCount; i++)
+	{
+		BK4819_ToggleGpioOut(((RedGreen)?BK4819_GPIO6_PIN2_GREEN:BK4819_GPIO5_PIN1_RED), true);
+		SYSTEM_DelayMs(100);
+		BK4819_ToggleGpioOut(((RedGreen)?BK4819_GPIO6_PIN2_GREEN:BK4819_GPIO5_PIN1_RED), false);
+		SYSTEM_DelayMs(100);
+	}
 }

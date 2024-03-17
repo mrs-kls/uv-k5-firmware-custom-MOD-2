@@ -31,5 +31,7 @@ void     APP_Update(void);
 void     APP_TimeSlice10ms(void);
 void     APP_TimeSlice500ms(void);
 
+void FlashLED(uint8_t FlashCount, bool RedGreen);
+
 #endif
 
