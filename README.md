@@ -109,19 +109,31 @@ I have forked and modifidied Egzumer's CHIRP driver for the UV-K5 to manage the 
 <tr>
 <td>v00.01</td>
 <td>
-   <ul>
-      <li>Initial Release</li>
-   </ul>
+<ul>
+<li>
+
+Initial Release
+
+</li>
+</ul>
 </td>
 <td>2024-03-16T22:27:38Z</td>
 </tr>
 <tr>
 <td>v00.02</td>
 <td>
-   <ul>
-      <li>Added a TempLockout while scanning, pressing `*` will lock out the channel until a powercycle, red flash twice and carry on scanning the next channel</li>
-      <li>Moved flashing of LED into the `FlashLED` function</li>
-   </ul>
+<ul>
+<li>
+
+Added a TempLockout while scanning, pressing `*` will lock out the channel until a powercycle, red flash twice and carry on scanning the next channel
+
+</li>
+<li>
+
+Moved flashing of LED into the `FlashLED` function
+
+</li>
+</ul>
 </td>
 <td>2024-03-17T02:02:52Z</td>
 </tr>
