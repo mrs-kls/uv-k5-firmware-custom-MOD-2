@@ -76,7 +76,7 @@ bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t ScanL
 	}
 	else { // Checking the ScanList
 		// Make sure the channel is in the ScanList and it's not locked out
-		if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout) {
+		if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout && !gMR_ChannelLists[channel].ScanListTempLockout) {
 			return true;
 		}
 	}

@@ -28,6 +28,7 @@ NOTE: This README has only barely been updated from the original Egzumer version
 * When scanning, the ScanLists now show along the top of the screen
 * Toggling ScanLists on/off is as simple as pressing the number
 * Memory channels can now be excluded (Lockout/Skip) from scanning
+* Temporarily exlude channels while scanning, pressing `*` will lock out the channel until a powercycle
 * Scanning can be set to automatically start when the radio is turned on
 * All the changes can be managed through CHIRP
 * When factory resetting, it will only create ONE new channel instead of the original 5
@@ -61,13 +62,20 @@ NOTE: This README has only barely been updated from the original Egzumer version
 * (as previous) to change direction, press up / down
 
 ## Lockouts
-The scanner can be set to exclude (lockout/skip) channels from all lists
+The scanner can be set to permanently exclude (lockout/skip) channels from all lists
 1. Switch to a Memory Channel
 2. Press the `Menu` button
 3. Navigate to item 15 `ScnLkO`
 4. Press the `Menu` button to edit
 5. Press `Up`/`Down` to toggle the lockout
 6. Press the `Menu` button to save
+The scanner can be set to temporarily exclude (temp lockout/skip) channels from all lists until the next power cycle
+1. Make sure the radio is scanning memory channels
+2. Press the `*` key
+3. The LED will flash red twice
+4. The radio will continue scanning
+5. To reset temporary locked out channels, turn the radio off and back on
+
 
 ## Scan on start
 1. Press the `Menu` button
@@ -92,6 +100,26 @@ The scanner can be set to exclude (lockout/skip) channels from all lists
 All the above can be set through CHIRP and I highly recommend you use it, as it makes it a lot easier.<br>
 I have forked and modifidied Egzumer's CHIRP driver for the UV-K5 to manage the ScanLists, LockOut, and StartOnScan.<br>
 [Aubs UV-K5 CHIRP Driver](https://github.com/AubsUK/uvk5-chirp-driver)
+
+<br><br>
+
+# ChangeLog
+<table>
+<tr><th>Version Number</th><th>Changes</th><th>Date</th></tr>
+<tr>
+<td>v00.01</td>
+<td>Initial Release</td>
+<td>2024-03-16T22:27:38Z</td>
+</tr>
+<tr>
+<td>v00.02</td>
+<td>
+* Added a TempLockout while scanning, pressing `*` will lock out the channel until a powercycle, red flash twice and carry on scanning the next channel<br>
+* Moved flashing of LED into the `FlashLED` function
+</td>
+<td>2024-03-17T01:56:00Z</td>
+</tr>
+</table>
 
 <br><br>
 

@@ -187,8 +187,9 @@ typedef union {
 extern ChannelAttributes_t   gMR_ChannelAttributes[207];
 
 typedef struct {
-    bool ScanList[10];
+    bool ScanList[10];  
 	bool ScanListLockout;
+	bool ScanListTempLockout;
 } ChannelLists_t;
 extern ChannelLists_t    gMR_ChannelLists[MR_CHANNEL_LAST + 1];
 
