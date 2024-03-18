@@ -70,7 +70,7 @@ static void SCANNER_Key_DIGITS(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 #ifdef ENABLE_VOICE
 				gAnotherVoiceID = (VOICE_ID_t)Key;
 #endif
-				gShowChPrefix = RADIO_CheckValidChannel(chan, false, 10);
+				gShowChPrefix = RADIO_CheckValidChannel(chan, 10);
 				gScanChannel  = (uint8_t)chan;
 				return;
 			}
@@ -162,7 +162,7 @@ static void SCANNER_Key_MENU(bool bKeyPressed, bool bKeyHeld)
 			if (IS_MR_CHANNEL(gTxVfo->CHANNEL_SAVE)) {
 				gScannerSaveState = SCAN_SAVE_CHAN_SEL;
 				gScanChannel      = gTxVfo->CHANNEL_SAVE;
-				gShowChPrefix     = RADIO_CheckValidChannel(gTxVfo->CHANNEL_SAVE, false, 10);
+				gShowChPrefix     = RADIO_CheckValidChannel(gTxVfo->CHANNEL_SAVE, 10);
 			}
 			else {
 				gScannerSaveState = SCAN_SAVE_CHANNEL;
@@ -264,7 +264,7 @@ static void SCANNER_Key_UP_DOWN(bool bKeyPressed, bool pKeyHeld, int8_t Directio
 
 	if (gScannerSaveState == SCAN_SAVE_CHAN_SEL) {
 		gScanChannel          = NUMBER_AddWithWraparound(gScanChannel, Direction, 0, MR_CHANNEL_LAST);
-		gShowChPrefix         = RADIO_CheckValidChannel(gScanChannel, false, 10);
+		gShowChPrefix         = RADIO_CheckValidChannel(gScanChannel, 10);
 		gRequestDisplayScreen = DISPLAY_SCANNER;
 	}
 	else

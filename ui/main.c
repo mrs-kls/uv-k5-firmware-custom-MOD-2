@@ -333,6 +333,7 @@ void UI_DisplayMain(void)
 		const unsigned int line1 = 4;
 		const unsigned int line       = (vfo_num == 0) ? line0 : line1;
 		const bool         isMainVFO  = (vfo_num == gEeprom.TX_VFO);
+		const unsigned int get_vfo_num_gEeprom_ScreenChannel = gEeprom.ScreenChannel[vfo_num];
 		uint8_t           *p_line0    = gFrameBuffer[line + 0];
 		uint8_t           *p_line1    = gFrameBuffer[line + 1];
 		enum Vfo_txtr_mode mode       = VFO_MODE_NONE;
@@ -432,22 +433,22 @@ void UI_DisplayMain(void)
 			}
 		}
 
-		if (IS_MR_CHANNEL(gEeprom.ScreenChannel[vfo_num]))
+		if (IS_MR_CHANNEL(get_vfo_num_gEeprom_ScreenChannel))
 		{	// channel mode
 			const unsigned int x = 2;
 			const bool inputting = gInputBoxIndex != 0 && gEeprom.TX_VFO == vfo_num;
 			if (!inputting)
-				sprintf(String, "M%u", gEeprom.ScreenChannel[vfo_num] + 1);
+				sprintf(String, "M%u", get_vfo_num_gEeprom_ScreenChannel + 1);
 			else
 				sprintf(String, "M%.3s", INPUTBOX_GetAscii());  // show the input text
 			UI_PrintStringSmallNormal(String, x, 0, line + 1);
 		}
-		else if (IS_FREQ_CHANNEL(gEeprom.ScreenChannel[vfo_num]))
+		else if (IS_FREQ_CHANNEL(get_vfo_num_gEeprom_ScreenChannel))
 		{	// frequency mode
 			// show the frequency band number
 			const unsigned int x = 2;
 			char * buf = gEeprom.VfoInfo[vfo_num].pRX->Frequency < _1GHz_in_KHz ? "" : "+";
-			sprintf(String, "F%u%s", 1 + gEeprom.ScreenChannel[vfo_num] - FREQ_CHANNEL_FIRST, buf);
+			sprintf(String, "F%u%s", 1 + get_vfo_num_gEeprom_ScreenChannel - FREQ_CHANNEL_FIRST, buf);
 			UI_PrintStringSmallNormal(String, x, 0, line + 1);
 		}
 #ifdef ENABLE_NOAA
@@ -455,7 +456,7 @@ void UI_DisplayMain(void)
 		{
 			if (gInputBoxIndex == 0 || gEeprom.TX_VFO != vfo_num)
 			{	// channel number
-				sprintf(String, "N%u", 1 + gEeprom.ScreenChannel[vfo_num] - NOAA_CHANNEL_FIRST);
+				sprintf(String, "N%u", 1 + get_vfo_num_gEeprom_ScreenChannel - NOAA_CHANNEL_FIRST);
 			}
 			else
 			{	// user entering channel number
@@ -483,7 +484,7 @@ void UI_DisplayMain(void)
 			if (state < ARRAY_SIZE(VfoStateStr))
 				UI_PrintString(VfoStateStr[state], 31, 0, line, 8);
 		}
-		else if (gInputBoxIndex > 0 && IS_FREQ_CHANNEL(gEeprom.ScreenChannel[vfo_num]) && gEeprom.TX_VFO == vfo_num)
+		else if (gInputBoxIndex > 0 && IS_FREQ_CHANNEL(get_vfo_num_gEeprom_ScreenChannel) && gEeprom.TX_VFO == vfo_num)
 		{	// user entering a frequency
 			const char * ascii = INPUTBOX_GetAscii();
 			bool isGigaF = frequency>=_1GHz_in_KHz;
@@ -513,7 +514,7 @@ void UI_DisplayMain(void)
 					frequency = gEeprom.VfoInfo[vfo_num].pTX->Frequency;
 			}
 
-			if (IS_MR_CHANNEL(gEeprom.ScreenChannel[vfo_num]))
+			if (IS_MR_CHANNEL(get_vfo_num_gEeprom_ScreenChannel))
 			{	// it's a channel
 				// compander symbol
 #ifndef ENABLE_BIG_FREQ
@@ -545,17 +546,17 @@ void UI_DisplayMain(void)
 						break;
 
 					case MDF_CHANNEL:	// show the channel number
-						sprintf(String, "CH-%03u", gEeprom.ScreenChannel[vfo_num] + 1);
+						sprintf(String, "CH-%03u", get_vfo_num_gEeprom_ScreenChannel + 1);
 						UI_PrintString(String, 32, 0, line, 8);
 						break;
 
 					case MDF_NAME:		// show the channel name
 					case MDF_NAME_FREQ:	// show the channel name and frequency
 
-						SETTINGS_FetchChannelName(String, gEeprom.ScreenChannel[vfo_num]);
+						SETTINGS_FetchChannelName(String, get_vfo_num_gEeprom_ScreenChannel);
 						if (String[0] == 0)
 						{	// no channel name, show the channel number instead
-							sprintf(String, "CH-%03u", gEeprom.ScreenChannel[vfo_num] + 1);
+							sprintf(String, "CH-%03u", get_vfo_num_gEeprom_ScreenChannel + 1);
 						}
 
 						if (gEeprom.CHANNEL_DISPLAY_MODE == MDF_NAME) {
@@ -591,8 +592,9 @@ void UI_DisplayMain(void)
 				}
 
 				// show the channel symbols
-				const ChannelAttributes_t att = gMR_ChannelAttributes[gEeprom.ScreenChannel[vfo_num]];
-				if (att.compander)
+//				const ChannelAttributes_t att = gMR_ChannelAttributes[get_vfo_num_gEeprom_ScreenChannel];
+//				if (att.compander)
+				if (gMR_ChannelAttributes[get_vfo_num_gEeprom_ScreenChannel].compander)
 #ifdef ENABLE_BIG_FREQ
 					memcpy(p_line0 + 120, BITMAP_compand, sizeof(BITMAP_compand));
 #else

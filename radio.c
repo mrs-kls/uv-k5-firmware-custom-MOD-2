@@ -57,25 +57,24 @@ const char gModulationStr[MODULATION_UKNOWN][4] = {
 
 
 
-bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t ScanList)
+// Check if the we're on a valid channel.  Set ScanList to 10 to ignore the scanlist being checked.
+bool RADIO_CheckValidChannel(uint16_t channel, uint8_t ScanList)
 {
 	(void)ScanList;
 	if (!IS_MR_CHANNEL(channel)) {
 		return false;
 	}
 
-	const ChannelAttributes_t att = gMR_ChannelAttributes[channel];
-
-	if (att.band > BAND7_470MHz) {
+	if (gMR_ChannelAttributes[channel].band > BAND7_470MHz) {
 		return false;
 	}
 
 	// Just checking it is a valid channel and don't care what ScanList it is in
-	if (!checkScanList) {
+	if (ScanList == 10) {
 		return true;
 	}
 	else { // Checking the ScanList
-		// Make sure the channel is in the ScanList and it's not locked out
+		// Make sure the channel is in the ScanList and it's not locked out (full or temp)
 		if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout && !gMR_ChannelLists[channel].ScanListTempLockout) {
 			return true;
 		}
@@ -85,8 +84,8 @@ bool RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t ScanL
 
 
 
-
-uint8_t RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, bool bCheckScanList, uint8_t ScanList)
+// Find the next channel we can use.  Set ScanList to 10 to ignore the scanlist being checked.
+uint8_t RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, uint8_t ScanList)
 {
 	for (unsigned int i = 0; IS_MR_CHANNEL(i); i++, Channel += Direction) {
 		if (Channel == 0xFF) {
@@ -94,11 +93,10 @@ uint8_t RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, bool bCheckScan
 		} else if (!IS_MR_CHANNEL(Channel)) {
 			Channel = MR_CHANNEL_FIRST;
 		}
-		if (RADIO_CheckValidChannel(Channel, bCheckScanList, ScanList)) {
+		if (RADIO_CheckValidChannel(Channel, ScanList)) {
 			return Channel;
 		}
 	}
-
 	return 0xFF;
 }
 
@@ -163,7 +161,7 @@ void RADIO_ConfigureChannel(const unsigned int VFO, const unsigned int configure
 #endif
 
 		if (IS_MR_CHANNEL(channel)) {
-			channel = RADIO_FindNextChannel(channel, RADIO_CHANNEL_UP, false, VFO);
+			channel = RADIO_FindNextChannel(channel, RADIO_CHANNEL_UP, 10);
 			if (channel == 0xFF) {
 				channel                    = gEeprom.FreqChannel[VFO];
 				gEeprom.ScreenChannel[VFO] = gEeprom.FreqChannel[VFO];

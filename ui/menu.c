@@ -409,6 +409,7 @@ void UI_DisplayMenu(void)
 	const unsigned int menu_list_width = 6; // max no. of characters on the menu list (left side)
 	const unsigned int menu_item_x1    = (8 * menu_list_width) + 2;
 	const unsigned int menu_item_x2    = LCD_WIDTH - 1;
+	const bool gSubMenuSelectionIsValidChannel = RADIO_CheckValidChannel(gSubMenuSelection, 10);
 	unsigned int       i;
 	char               String[64];  // bigger cuz we can now do multi-line in one string (use '\n' char)
 
@@ -655,12 +656,10 @@ void UI_DisplayMenu(void)
 		case MENU_1_CALL:
 		case MENU_DEL_CH:
 		{
-			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 10);
-
-			UI_GenerateChannelStringEx(String, valid, gSubMenuSelection);
+			UI_GenerateChannelStringEx(String, gSubMenuSelectionIsValidChannel, gSubMenuSelection);
 			UI_PrintString(String, menu_item_x1, menu_item_x2, 0, 8);
 
-			if (valid && !gAskForConfirmation)
+			if (gSubMenuSelectionIsValidChannel && !gAskForConfirmation)
 			{	// show the frequency so that the user knows the channels frequency
 				const uint32_t frequency = SETTINGS_FetchChannelFrequency(gSubMenuSelection);
 				sprintf(String, "%u.%05u", frequency / 100000, frequency % 100000);
@@ -675,12 +674,10 @@ void UI_DisplayMenu(void)
 
 		case MENU_MEM_NAME:
 		{
-			const bool valid = RADIO_CheckValidChannel(gSubMenuSelection, false, 10);
-
-			UI_GenerateChannelStringEx(String, valid, gSubMenuSelection);
+			UI_GenerateChannelStringEx(String, gSubMenuSelectionIsValidChannel, gSubMenuSelection);
 			UI_PrintString(String, menu_item_x1, menu_item_x2, 0, 8);
 
-			if (valid)
+			if (gSubMenuSelectionIsValidChannel)
 			{
 				const uint32_t frequency = SETTINGS_FetchChannelFrequency(gSubMenuSelection);
 
@@ -908,32 +905,7 @@ void UI_DisplayMenu(void)
 
 	if (UI_MENU_GetCurrentMenuId() >= MENU_SLIST0 && UI_MENU_GetCurrentMenuId() <= MENU_SLIST9)
 	{
-		char *pPrintStr = String;
-		if (gSubMenuSelection < 0)
-		{
-			pPrintStr = "NULL";
-		}
-		else
-		{
-			UI_GenerateChannelStringEx(String, true, gSubMenuSelection);
-			pPrintStr = String;
-		}
-
-		// channel number
-		UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 0, 8);
-
-		SETTINGS_FetchChannelName(String, gSubMenuSelection);
-		pPrintStr = String[0] ? String : "--";
-
-		// channel name and scan-list
-		if (gSubMenuSelection < 0)
-		{
-			UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 2, 8);
-		}
-		else
-		{
-			UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 2);
-		}
+		UI_PopulateScanListView(String,gSubMenuSelection, menu_item_x1, menu_item_x2);
 	}
 
 	if ((UI_MENU_GetCurrentMenuId() == MENU_R_CTCS || UI_MENU_GetCurrentMenuId() == MENU_R_DCS) && gCssBackgroundScan)
@@ -1006,3 +978,35 @@ void UI_GetScanListInfo()
 	UI_PrintString(listText, 48, 127, 1, 8);					    // Print/Re-print the list to screen in the menu
 }
 
+
+
+// Display list of channels in each ScanList
+void UI_PopulateScanListView(char *String,int32_t gSubMenuSelection,uint8_t menu_item_x1,uint8_t menu_item_x2)
+{
+	char *pPrintStr = String;
+	if (gSubMenuSelection < 0 || gSubMenuSelection > MR_CHANNEL_LAST)
+	{
+		pPrintStr = "NULL";
+	}
+	else
+	{
+		UI_GenerateChannelStringEx(String, true, gSubMenuSelection);
+		pPrintStr = String;
+	}
+
+	// channel number
+	UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 0, 8);
+
+	SETTINGS_FetchChannelName(String, gSubMenuSelection);
+	pPrintStr = String[0] ? String : "--";
+
+	// channel name and scan-list
+	if (gSubMenuSelection < 0)
+	{
+		UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 2, 8);
+	}
+	else
+	{
+		UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 2);
+	}
+}

@@ -146,8 +146,8 @@ extern DCS_CodeType_t gCurrentCodeType;
 
 extern VfoState_t     VfoState[2];
 
-bool     RADIO_CheckValidChannel(uint16_t channel, bool checkScanList, uint8_t ScanList);
-uint8_t  RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, bool bCheckScanList, uint8_t ScanList);
+bool     RADIO_CheckValidChannel(uint16_t channel, uint8_t ScanList);
+uint8_t  RADIO_FindNextChannel(uint8_t Channel, int8_t Direction, uint8_t ScanList);
 void     RADIO_InitInfo(VFO_Info_t *pInfo, const uint8_t ChannelSave, const uint32_t Frequency);
 void     RADIO_ConfigureChannel(const unsigned int VFO, const unsigned int configure);
 void     RADIO_ConfigureSquelchAndOutputPower(VFO_Info_t *pInfo);

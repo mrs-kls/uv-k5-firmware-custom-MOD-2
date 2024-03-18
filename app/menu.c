@@ -523,16 +523,16 @@ void MENU_AcceptSetting(void)
 			gFlagResetVfos      = true;
 			return;
 
-		case MENU_MEM_NAME:
+		case MENU_MEM_NAME:{
 			for (int i = 9; i >= 0; i--) {
-				if (edit[i] != ' ' && edit[i] != '_' && edit[i] != 0x00 && edit[i] != 0xff)
-					break;
-				edit[i] = ' ';
+				if (edit[i] == ' ' || edit[i] == '_' || edit[i] == 0x00 || edit[i] == 0xff)
+				{
+					edit[i] = ' ';
+				}
 			}
-
 			SETTINGS_SaveChannelName(gSubMenuSelection, edit);
 			return;
-
+		}
 		case MENU_SAVE:
 			gEeprom.BATTERY_SAVE = gSubMenuSelection;
 			break;
@@ -1050,7 +1050,7 @@ void MENU_ShowCurrentSetting(void)
 		case MENU_SLIST7:
 		case MENU_SLIST8:
 		case MENU_SLIST9:
-			gSubMenuSelection = RADIO_FindNextChannel(0, 1, true, (UI_MENU_GetCurrentMenuId() - MENU_SLIST0));
+			gSubMenuSelection = RADIO_FindNextChannel(0, SCAN_FWD, (UI_MENU_GetCurrentMenuId() - MENU_SLIST0));
 			break;
 
 		#ifdef ENABLE_ALARM
@@ -1122,9 +1122,9 @@ void MENU_ShowCurrentSetting(void)
 
 		case MENU_DEL_CH:
 			#if 0
-				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[0], 1, false, 1);
+				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[0], SCAN_FWD, 10);
 			#else
-				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[gEeprom.TX_VFO], 1, false, 10);
+				gSubMenuSelection = RADIO_FindNextChannel(gEeprom.MrChannel[gEeprom.TX_VFO], SCAN_FWD, 10);
 			#endif
 			break;
 
@@ -1391,7 +1391,9 @@ static void MENU_Key_EXIT(bool bKeyPressed, bool bKeyHeld)
 				#endif
 			}
 			else
+			{
 				gInputBox[--gInputBoxIndex] = 10;
+			}
 
 			// ***********************
 
@@ -1450,7 +1452,7 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
             return;
 		#if 1
 			if (UI_MENU_GetCurrentMenuId() == MENU_DEL_CH || UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME)
-				if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 10))
+				if (!RADIO_CheckValidChannel(gSubMenuSelection, 10))
 					return;  // invalid channel
 		#endif
 
@@ -1470,7 +1472,7 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 	{
 		if (edit_index < 0)
 		{	// enter channel name edit mode
-			if (!RADIO_CheckValidChannel(gSubMenuSelection, false, 10))
+			if (!RADIO_CheckValidChannel(gSubMenuSelection, 10))
 				return;
 
 			SETTINGS_FetchChannelName(edit, gSubMenuSelection);
@@ -1623,7 +1625,6 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 {
 	uint8_t ScanList = 10;
 	uint8_t Channel;
-	bool    bCheckScanList;
 
 	if (UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME && gIsInSubMenu && edit_index >= 0)
 	{	// change the character
@@ -1700,7 +1701,6 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 		case MENU_DEL_CH:
 		case MENU_1_CALL:
 		case MENU_MEM_NAME:
-			bCheckScanList = false;
 			break;
 
 		case MENU_SLIST0:
@@ -1714,7 +1714,6 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 		case MENU_SLIST8:
 		case MENU_SLIST9:
 			ScanList = (UI_MENU_GetCurrentMenuId() - MENU_SLIST0);
-			bCheckScanList = true;
 			break;
 
 		default:
@@ -1723,7 +1722,7 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 			return;
 	}
 
-	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, bCheckScanList, ScanList);
+	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, ScanList);
 	if (Channel != 0xFF)
 		gSubMenuSelection = Channel;
 
@@ -1802,8 +1801,11 @@ void MENU_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 	}
 }
 
+
+
+
 /*
- * Process the Scan List information, either to Display in the menu screen, or when Accepting (saving) in the menu
+ * Process the ScanList information for the current channel, either to Display in the menu screen, or when Accepting (saving) in the menu
  * Provide a pointer to fill for Displaying, or set it to NULL for Accepting
  */
 void UI_MENU_ScanLists()
