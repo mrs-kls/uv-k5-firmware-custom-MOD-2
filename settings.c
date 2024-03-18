@@ -851,7 +851,8 @@ void SETTINGS_UpdateChannel(uint8_t channel, const VFO_Info_t *pVFO, bool keep)
 		}
 		else { 
 			if (IS_MR_CHANNEL(channel)) { // if it's a memory channel
-				SETTINGS_SaveChannelName(channel, "");  // Reset/wipe the channel Name
+				SETTINGS_SaveChannelName(channel, "");  // Reset/wipe channel Name
+				for (int i = 0; i < 10; i++) { gMR_ChannelLists[channel].ScanList[i] = false; } // Reset channel ScanLists before writing back
 			}
 		}
 		SETTINGS_SaveChannelScanLists(channel, keep);
