@@ -89,10 +89,14 @@ The scanner can be set to temporarily exclude (temp lockout/skip) channels from 
 
 ## Review ScanList Members
 1. Press the `Menu` button
-2. Navigate to items 20 to 29 `SList0`..`SList9`, for ScanList 0 to 9 respectively
+2. Navigate to item 20 `SLists`
 3. Press the `Menu` button to step into the list
-4. Press `Up`/`Down` to scroll through the channels in the current ScanList
-5. Press the `Exit` button to close
+4. Press `Up`/`Down` to scroll through all channels
+5. Press keys `0`..`9` to switch between each ScanList
+6. Press the `Exit` button to close
+### Note
+* At the bottom, there's a list of all ScanLists the current channel is in
+* To get back to `ALL`, switch the radio off and back on again
 
 <br><br>
 
@@ -136,6 +140,24 @@ Moved flashing of LED into the `FlashLED` function
 </ul>
 </td>
 <td>2024-03-17T02:02:52Z</td>
+</tr>
+<tr>
+<td>v00.03</td>
+<td>
+<ul>
+<li>
+
+Tidied up the menu by replacing `ScanList0`..`ScanList9` with `ScanLists`, switch between each using numbers on the keypad
+
+</li>
+<li>
+
+A few bits of refractoring to reduce compiled code size
+
+</li>
+</ul>
+</td>
+<td>TBC</td>
 </tr>
 </table>
 

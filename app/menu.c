@@ -53,7 +53,7 @@
 #endif
 
 uint8_t gUnlockAllTxConfCnt;
-
+uint8_t Menu_SelectedScanList = 10;										// When on the menu item `MENU_SLISTS`, this is used to switch between scanlists
 
 
 
@@ -306,16 +306,7 @@ int MENU_GetLimits(uint8_t menu_id, int32_t *pMin, int32_t *pMax)
 			*pMax = MR_CHANNEL_LAST;
 			break;
 
-		case MENU_SLIST0:
-		case MENU_SLIST1:
-		case MENU_SLIST2:
-		case MENU_SLIST3:
-		case MENU_SLIST4:
-		case MENU_SLIST5:
-		case MENU_SLIST6:
-		case MENU_SLIST7:
-		case MENU_SLIST8:
-		case MENU_SLIST9:
+		case MENU_SLISTS:
 			*pMin = -1;
 			*pMax = MR_CHANNEL_LAST;
 			break;
@@ -1005,7 +996,7 @@ void MENU_ShowCurrentSetting(void)
 			break;
 
 		case MENU_S_ADD:{
-				UI_GetScanListInfo();
+				UI_GetScanListInfoForChannel(true);
 			}
 			break;
 		case MENU_SCN_LOCKOUT:
@@ -1040,19 +1031,8 @@ void MENU_ShowCurrentSetting(void)
 			gSubMenuSelection = gEeprom.CHAN_1_CALL;
 			break;
 
-		case MENU_SLIST0:
-		case MENU_SLIST1:
-		case MENU_SLIST2:
-		case MENU_SLIST3:
-		case MENU_SLIST4:
-		case MENU_SLIST5:
-		case MENU_SLIST6:
-		case MENU_SLIST7:
-		case MENU_SLIST8:
-		case MENU_SLIST9:
-			gSubMenuSelection = RADIO_FindNextChannel(0, SCAN_FWD, (UI_MENU_GetCurrentMenuId() - MENU_SLIST0));
+		case MENU_SLISTS:
 			break;
-
 		#ifdef ENABLE_ALARM
 			case MENU_AL_MOD:
 				gSubMenuSelection = gEeprom.ALARM_MODE;
@@ -1232,11 +1212,22 @@ static void MENU_Key_0_to_9(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 	}
 
 	if (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_S_ADD)
-	{	// currently on the channel's Lists
-		
+	{	// Currently on a channel's ScanLists
 		gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[Key] = !gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[Key];	// Toggle the List for the channel in memory 
 		UI_MENU_ScanLists();
-		UI_GetScanListInfo();
+		UI_GetScanListInfoForChannel(true);
+		return;
+	}
+
+	if (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_SLISTS)
+	{ // Currently on the list of channels in each ScanList, key pressed to show that list
+		Menu_SelectedScanList = Key;
+		uint8_t Channel;
+		Channel = CURRENT_LIST_FIRST_or_LAST_CHANNEL(Menu_SelectedScanList,1);  // List changed (or reset), so get the first channel in the List
+		if (Channel != 0xFF) {
+			gSubMenuSelection = Channel;
+		}
+		gRequestDisplayScreen = DISPLAY_MENU;
 		return;
 	}
 
@@ -1456,6 +1447,9 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 					return;  // invalid channel
 		#endif
 
+		if(UI_MENU_GetCurrentMenuId() == MENU_SLISTS) {
+			gSubMenuSelection = 0;
+		}
 		gAskForConfirmation = 0;
 		gIsInSubMenu        = true;
 
@@ -1513,8 +1507,8 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 		if (UI_MENU_GetCurrentMenuId() == MENU_RESET  ||
 			UI_MENU_GetCurrentMenuId() == MENU_MEM_CH ||
 			UI_MENU_GetCurrentMenuId() == MENU_DEL_CH ||
-			UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME)
-		{
+			UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME) {
+			
 			switch (gAskForConfirmation)
 			{
 				case 0:
@@ -1546,9 +1540,22 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 					gIsInSubMenu        = false;
 					gAskForConfirmation = 0;
 			}
-		}
-		else
-		{
+// Figure out how the ask for confirmation works (initial thoughts it is in the UI_DisplayMenu() where if the menu is X, it checks and does what you ask)
+/* 		} else if (UI_MENU_GetCurrentMenuId() == MENU_SLISTS) {
+			switch (gAskForConfirmation)
+			{
+				case 0:
+					gAskForConfirmation = 1;
+					break;
+
+				case 1:
+					gAskForConfirmation = 2;
+
+					UI_DisplayMenu();
+					gFlagAcceptSetting  = true;
+					gAskForConfirmation = 0;
+			} */
+		} else {
 			gFlagAcceptSetting = true;
 			gIsInSubMenu       = false;
 		}
@@ -1623,7 +1630,6 @@ static void MENU_Key_STAR(const bool bKeyPressed, const bool bKeyHeld)
 
 static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 {
-	uint8_t ScanList = 10;
 	uint8_t Channel;
 
 	if (UI_MENU_GetCurrentMenuId() == MENU_MEM_NAME && gIsInSubMenu && edit_index >= 0)
@@ -1701,19 +1707,7 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 		case MENU_DEL_CH:
 		case MENU_1_CALL:
 		case MENU_MEM_NAME:
-			break;
-
-		case MENU_SLIST0:
-		case MENU_SLIST1:
-		case MENU_SLIST2:
-		case MENU_SLIST3:
-		case MENU_SLIST4:
-		case MENU_SLIST5:
-		case MENU_SLIST6:
-		case MENU_SLIST7:
-		case MENU_SLIST8:
-		case MENU_SLIST9:
-			ScanList = (UI_MENU_GetCurrentMenuId() - MENU_SLIST0);
+		case MENU_SLISTS:
 			break;
 
 		default:
@@ -1722,9 +1716,10 @@ static void MENU_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 			return;
 	}
 
-	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, ScanList);
-	if (Channel != 0xFF)
+	Channel = RADIO_FindNextChannel(gSubMenuSelection + Direction, Direction, Menu_SelectedScanList);
+	if (Channel != 0xFF) {
 		gSubMenuSelection = Channel;
+	}
 
 	gRequestDisplayScreen = DISPLAY_MENU;
 }
@@ -1805,6 +1800,7 @@ void MENU_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 
 
 /*
+ * Update ScanLists for a channel from within menu item `MENU_S_ADD`
  * Process the ScanList information for the current channel, either to Display in the menu screen, or when Accepting (saving) in the menu
  * Provide a pointer to fill for Displaying, or set it to NULL for Accepting
  */

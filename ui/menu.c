@@ -36,6 +36,7 @@
 #include "menu.h"
 #include "ui.h"
 
+extern uint8_t Menu_SelectedScanList;
 
 const t_menu_item MenuList[] =
 {
@@ -60,16 +61,7 @@ const t_menu_item MenuList[] =
 	{"ChDele", VOICE_ID_DELETE_CHANNEL,                MENU_DEL_CH        }, // was "DEL-CH"
 	{"ChName", VOICE_ID_INVALID,                       MENU_MEM_NAME      },
 
-	{"SList0", VOICE_ID_INVALID,                       MENU_SLIST0        },
-	{"SList1", VOICE_ID_INVALID,                       MENU_SLIST1        },
-	{"SList2", VOICE_ID_INVALID,                       MENU_SLIST2        },
-	{"SList3", VOICE_ID_INVALID,                       MENU_SLIST3        },
-	{"SList4", VOICE_ID_INVALID,                       MENU_SLIST4        },
-	{"SList5", VOICE_ID_INVALID,                       MENU_SLIST5        },
-	{"SList6", VOICE_ID_INVALID,                       MENU_SLIST6        },
-	{"SList7", VOICE_ID_INVALID,                       MENU_SLIST7        },
-	{"SList8", VOICE_ID_INVALID,                       MENU_SLIST8        },
-	{"SList9", VOICE_ID_INVALID,                       MENU_SLIST9        },
+	{"SLists", VOICE_ID_INVALID,                       MENU_SLISTS        },
 	{"ScnRev", VOICE_ID_INVALID,                       MENU_SC_REV        },
 #ifdef ENABLE_NOAA
 	{"NOAA-S", VOICE_ID_INVALID,                       MENU_NOAA_S        },
@@ -648,7 +640,7 @@ void UI_DisplayMenu(void)
 			strcpy(String, gSubMenu_OFF_ON[gSubMenuSelection]);
 			break;
 		case MENU_S_ADD:{
-			UI_GetScanListInfo();
+			UI_GetScanListInfoForChannel(true);
 			already_printed = true;
 			break;
 		}
@@ -802,6 +794,31 @@ void UI_DisplayMenu(void)
 				BATTERY_VoltsToPercent(gBatteryVoltageAverage));
 			break;
 
+		case MENU_SLISTS:
+			if (gIsInSubMenu)
+			{
+				UI_PopulateScanListView(String, gSubMenuSelection, menu_item_x1, menu_item_x2);
+			}
+			else
+			{
+// This could be used to give a notice how to use it, but it uses quite a bit of space
+/*  				char *pPrintStr = "";
+				pPrintStr = "Select";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 0);
+				pPrintStr = "Menu and";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 1);
+				pPrintStr = "press key";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 2);
+				pPrintStr = "0-9 to";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 3);
+				pPrintStr = "display";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 4);
+				pPrintStr = "ScanList";
+				UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 5); */
+			}
+			already_printed = true;
+			break;
+
 		case MENU_RESET:
 			strcpy(String, gSubMenu_RESET[gSubMenuSelection]);
 			break;
@@ -903,11 +920,6 @@ void UI_DisplayMenu(void)
 		}
 	}
 
-	if (UI_MENU_GetCurrentMenuId() >= MENU_SLIST0 && UI_MENU_GetCurrentMenuId() <= MENU_SLIST9)
-	{
-		UI_PopulateScanListView(String,gSubMenuSelection, menu_item_x1, menu_item_x2);
-	}
-
 	if ((UI_MENU_GetCurrentMenuId() == MENU_R_CTCS || UI_MENU_GetCurrentMenuId() == MENU_R_DCS) && gCssBackgroundScan)
 		UI_PrintString("SCAN", menu_item_x1, menu_item_x2, 4, 8);
 
@@ -958,13 +970,20 @@ inline char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar) {
 
 
 
-// Extract Lists assigned to the current channel
-void UI_GetScanListInfo()
+// Extract ScanLists assigned to the current channel
+// For `ChannelOrScanListMemu`, use TRUE for Channel ScanList menu, False for List of ScanList Menu
+void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu)
 {
+	uint32_t ChannelNumberToUse;
+	if (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_SLISTS) { // Check if we're in the submenu for MENU_SLISTS, if so set the channel number to be the currently selected one, otherwise set it to the current active channel in the VFO
+		ChannelNumberToUse = gSubMenuSelection;
+	} else {
+		ChannelNumberToUse = gTxVfo->CHANNEL_SAVE;
+	}
 	char listText[11];
-	memset(listText, '\0', sizeof(listText));					    // Clear out everything in the listText array
+	memset(listText, '\0', sizeof(listText));					    // Set everything in the listText array to zeros
 	for (uint8_t i = 0; i < 10; ++i) {
-		if (gMR_ChannelLists[gTxVfo->CHANNEL_SAVE].ScanList[i]) {	// Check if the list is on
+		if (gMR_ChannelLists[ChannelNumberToUse].ScanList[i]) {	// Check if the list is on
 			listText[i] = UI_ConvertintToChar(i,'-');				// Set position i to be the number of the list [List is on] (return a hyphen '-' if it's out of range)
 		} else {
 			listText[i] = '_';									    // Set position i to be an underscore [List is off]
@@ -973,9 +992,22 @@ void UI_GetScanListInfo()
 	/*
 	 * menu_list_width = 6;
 	 * menu_item_x1    = (8 * menu_list_width) + 2;	== (8*6)+2	= 48
-	 * int menu_item_x2    = LCD_WIDTH - 1;			== 128		= 127
+	 * int menu_item_x2    = LCD_WIDTH - 1;			== 128-1	= 127
 	 */
-	UI_PrintString(listText, 48, 127, 1, 8);					    // Print/Re-print the list to screen in the menu
+	if (ChannelOrScanListMemu)
+	{
+		UI_PrintString(listText, 48, 127, 2, 8);					    // Print or re-print the list to screen in the menu
+	}
+	else
+	{
+
+		// copied from elsewhere
+		const unsigned int menu_list_width = 6; // max no. of characters on the menu list (left side)
+		const unsigned int menu_item_x1    = (8 * menu_list_width) + 2;
+		const unsigned int menu_item_x2    = LCD_WIDTH - 1;
+		UI_PrintStringSmallNormal(listText, menu_item_x1, menu_item_x2, 6);
+////		UI_PrintStringSmallNormal(listText, (8*6)+2, LCD_WIDTH - 1, 6);
+	}
 }
 
 
@@ -983,30 +1015,46 @@ void UI_GetScanListInfo()
 // Display list of channels in each ScanList
 void UI_PopulateScanListView(char *String,int32_t gSubMenuSelection,uint8_t menu_item_x1,uint8_t menu_item_x2)
 {
+	(void)menu_item_x1;
+	(void)menu_item_x2;
 	char *pPrintStr = String;
-	if (gSubMenuSelection < 0 || gSubMenuSelection > MR_CHANNEL_LAST)
-	{
+	
+	if (Menu_SelectedScanList < 10) 
+	{ // We're on a specific list
+		sprintf(pPrintStr, "LIST %01u", Menu_SelectedScanList);
+	} else { // We're on All Lists
+		pPrintStr = "ALL";
+	}
+	UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 0, 8);
+
+
+	if (gSubMenuSelection < MR_CHANNEL_FIRST || gSubMenuSelection > MR_CHANNEL_LAST)
+	{ // Out of range of channels, set the channel 'number' to NULL
 		pPrintStr = "NULL";
 	}
 	else
-	{
+	{ // In range of channels, set the channel 'number'
 		UI_GenerateChannelStringEx(String, true, gSubMenuSelection);
 		pPrintStr = String;
 	}
 
-	// channel number
-	UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 0, 8);
+	// Print the channel number
+	UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 2, 8);
 
 	SETTINGS_FetchChannelName(String, gSubMenuSelection);
-	pPrintStr = String[0] ? String : "--";
+	pPrintStr = String[0] ? String : "--";														// If the retrieved channel name is blank, set it to "--"
 
 	// channel name and scan-list
 	if (gSubMenuSelection < 0)
 	{
-		UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 2, 8);
+		UI_PrintString(pPrintStr, menu_item_x1, menu_item_x2, 4, 8);
 	}
 	else
 	{
-		UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 2);
+		UI_PrintStringSmallNormal(pPrintStr, menu_item_x1, menu_item_x2, 4);
 	}
+
+	//Use SETTINGS_FetchChannelFrequency() here (might need to convert to MHz?) to put the freq into the list with UI_PrintStringSmallNormal 
+	
+	UI_GetScanListInfoForChannel(false);
 }

@@ -74,16 +74,7 @@ enum
 #endif
 	MENU_COMPAND,
 	MENU_1_CALL,
-	MENU_SLIST0,
-	MENU_SLIST1,
-	MENU_SLIST2,
-	MENU_SLIST3,
-	MENU_SLIST4,
-	MENU_SLIST5,
-	MENU_SLIST6,
-	MENU_SLIST7,
-	MENU_SLIST8,
-	MENU_SLIST9,
+	MENU_SLISTS,
 #ifdef ENABLE_ALARM
 	MENU_AL_MOD,
 #endif
@@ -186,7 +177,7 @@ int UI_MENU_GetCurrentMenuId();
 uint8_t UI_MENU_GetMenuIdx(uint8_t id);
 
 char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar);	// declaration, function in ui/menu.c
-void UI_GetScanListInfo();											// declaration, function in ui/menu.c
+void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu);		// declaration, function in ui/menu.c
 void UI_PopulateScanListView(char *String,int32_t gSubMenuSelection,uint8_t menu_item_x1,uint8_t menu_item_x2);
 
 #endif
