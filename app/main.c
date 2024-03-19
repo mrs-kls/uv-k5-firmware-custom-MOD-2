@@ -233,7 +233,7 @@ static void processFKeyFunction(const KEY_Code_t Key, const bool beep)
 			break;
 
 		case KEY_9:
-			if (RADIO_CheckValidChannel(gEeprom.CHAN_1_CALL, false, 10)) {
+			if (RADIO_CheckValidChannel(gEeprom.CHAN_1_CALL, 10)) {
 				gEeprom.MrChannel[Vfo]     = gEeprom.CHAN_1_CALL;
 				gEeprom.ScreenChannel[Vfo] = gEeprom.CHAN_1_CALL;
 #ifdef ENABLE_VOICE
@@ -309,7 +309,7 @@ static void MAIN_Key_DIGITS(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 
 			const uint16_t Channel = ((gInputBox[0] * 100) + (gInputBox[1] * 10) + gInputBox[2]) - 1;
 
-			if (!RADIO_CheckValidChannel(Channel, false, 10)) {
+			if (!RADIO_CheckValidChannel(Channel, 10)) {
 				gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
 				return;
 			}
@@ -661,7 +661,7 @@ static void MAIN_Key_UP_DOWN(bool bKeyPressed, bool bKeyHeld, int8_t Direction)
 				return;
 			}
 
-			Next = RADIO_FindNextChannel(Channel + Direction, Direction, false, 0);
+			Next = RADIO_FindNextChannel(Channel + Direction, Direction, 10);
 			if (Next == 0xFF)
 				return;
 			if (Channel == Next)

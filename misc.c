@@ -276,3 +276,20 @@ unsigned long StrToUL(const char * str)
 	}
 	return ul;
 }
+
+// Get the first or last channel numerically in the specified list. For FirstOrLast, use 1 for first, or -1 for last
+uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
+{
+	for (
+			uint8_t First_Last_Chan_Val = (FirstOrLast == 1) ? MR_CHANNEL_FIRST : MR_CHANNEL_LAST;
+			First_Last_Chan_Val <= MR_CHANNEL_LAST;
+			First_Last_Chan_Val += FirstOrLast
+		) // Loop through all possible channels
+	{
+		if (gMR_ChannelLists[First_Last_Chan_Val].ScanList[CurList]) // We only need to look at the array item listed
+		{
+			return First_Last_Chan_Val; // Match found, return it
+		} 
+	}
+	return 0xFF; // No channels returned
+}

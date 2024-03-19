@@ -425,7 +425,7 @@ void SETTINGS_FetchChannelName(char *s, const int channel)
 	if (channel < 0)
 		return;
 
-	if (!RADIO_CheckValidChannel(channel, false, 0))
+	if (!RADIO_CheckValidChannel(channel, 10))
 		return;
 
 	EEPROM_ReadBuffer(0x0F50 + (channel * 16), s, 10);
@@ -851,8 +851,8 @@ void SETTINGS_UpdateChannel(uint8_t channel, const VFO_Info_t *pVFO, bool keep)
 		}
 		else { 
 			if (IS_MR_CHANNEL(channel)) { // if it's a memory channel
-				// clear/reset the channel name
-				SETTINGS_SaveChannelName(channel, "");
+				SETTINGS_SaveChannelName(channel, "");  // Reset/wipe channel Name
+				for (int i = 0; i < 10; i++) { gMR_ChannelLists[channel].ScanList[i] = false; } // Reset channel ScanLists before writing back
 			}
 		}
 		SETTINGS_SaveChannelScanLists(channel, keep);

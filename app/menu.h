@@ -20,7 +20,7 @@
 #include "driver/keyboard.h"
 
 char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar);		// Declaration, function in ui/menu.c
-void UI_GetScanListInfo();												// Declaration, function in ui/menu.c"
+void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu);			// Declaration, function in ui/menu.c"
 void UI_MENU_ScanLists();												// Declaration, function in ui/menu.c"
 
 

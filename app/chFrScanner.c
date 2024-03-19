@@ -36,7 +36,6 @@ void CHFRSCANNER_Start(const bool storeBackupSettings, const int8_t scan_directi
 	RADIO_SelectVfos();
 
 	gNextMrChannel   = gRxVfo->CHANNEL_SAVE;
-	//currentScanList = (currentScanList)? currentScanList : 0; // Carry on from where it was, or start at 0
 	gScanStateDir    = scan_direction;
 
 	if (IS_MR_CHANNEL(gNextMrChannel))
@@ -92,23 +91,18 @@ void CHFRSCANNER_ContinueScanning(void)
 
 void CHFRSCANNER_Found(void)
 {
-	switch (gEeprom.SCAN_RESUME_MODE)
+	// SCAN_RESUME_MODE can only be 0,1,2, there are no other options, so at this time, no need to specify `SCAN_RESUME_CO` or `SCAN_RESUME_SE`
+	if (gEeprom.SCAN_RESUME_MODE == SCAN_RESUME_TO)
 	{
-		case SCAN_RESUME_TO:
-			if (!gScanPauseMode)
-			{
-				gScanPauseDelayIn_10ms = scan_pause_delay_in_1_10ms;
-				gScheduleScanListen    = false;
-				gScanPauseMode         = true;
-			}
-			break;
-
-		case SCAN_RESUME_CO:
-		case SCAN_RESUME_SE:
+		if (!gScanPauseMode)
+		{
+			gScanPauseDelayIn_10ms = scan_pause_delay_in_1_10ms;
+			gScanPauseMode         = true;
+		} else {
 			gScanPauseDelayIn_10ms = 0;
-			gScheduleScanListen    = false;
-			break;
+		}
 	}
+	gScheduleScanListen    = false;
 
 	if (IS_MR_CHANNEL(gRxVfo->CHANNEL_SAVE)) { //memory scan
 		lastFoundFrqOrChan = gRxVfo->CHANNEL_SAVE;
@@ -161,26 +155,6 @@ void CHFRSCANNER_Stop(void)
 
 
 
-// Get the first or last channel numerically in the specified list. For FirstOrLast, use 1 for first, or -1 for last
-uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
-{
-	for (
-			uint8_t First_Last_Chan_Val = (FirstOrLast == 1) ? MR_CHANNEL_FIRST : MR_CHANNEL_LAST;
-			First_Last_Chan_Val <= MR_CHANNEL_LAST;
-			First_Last_Chan_Val += FirstOrLast
-		) // Loop through all possible channels
-	{
-		if (gMR_ChannelLists[First_Last_Chan_Val].ScanList[CurList]) // We only need to look at the array item listed
-		{
-			return First_Last_Chan_Val; // Match found, return it
-		} 
-	}
-	return 0xFF; // No channels returned
-}
-
-
-
-
 static void NextFreqChannel(void)
 {
 #ifdef ENABLE_SCAN_RANGES
@@ -227,7 +201,7 @@ static void NextMemChannel(void)
 		}
 		if (gEeprom.SCAN_LISTS[currentScanList]) // We're on an enabled ScanList
 		{
-			CurrChan = RADIO_FindNextChannel(gNextMrChannel + gScanStateDir, gScanStateDir, true, currentScanList);
+			CurrChan = RADIO_FindNextChannel(gNextMrChannel + gScanStateDir, gScanStateDir, currentScanList);
 			uint8_t FirstChan = CURRENT_LIST_FIRST_or_LAST_CHANNEL(currentScanList, 1);
 			uint8_t LastChan  = CURRENT_LIST_FIRST_or_LAST_CHANNEL(currentScanList,-1);
 			if (
