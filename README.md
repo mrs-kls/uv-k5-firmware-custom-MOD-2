@@ -202,17 +202,6 @@ Menus 17 >> Press `7` >> Members of ScanList 1 <br><br>
 
 
 
-
-
-
-Menus 20 to 29 list all channels in each ScanList<br><br>
-![Menus 20 to 29 list all channels in each ScanList](images/Aubs_Menu20-29_ScanList_Members.png)<br><br>
-Menu 22 >> Listing members of ScanList2 (first)<br><br>
-![Menu 22 >> Listing members of ScanList2 (first)](images/Aubs_Menu20-29_ScanList_Members_List1.png)<br><br>
-Menu 22 >> Listing members of ScanList2 (second)<br><br>
-![Menu 22 >> Listing members of ScanList2 (second)](images/Aubs_Menu20-29_ScanList_Members_List2.png)<br><br>
-
-
 CHIRP Download Menu<br><br>
 ![CHIRP Download Menu](images/Aubs_CHIRP_DownloadFromRadio.png)<br><br>
 CHIRP Memories showing LockOut and ScanLists<br><br>
