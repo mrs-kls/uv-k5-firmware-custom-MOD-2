@@ -197,7 +197,7 @@ Menus 17 >> Press `1` >> Members of ScanList 1 >> Press `Up` for next<br><br>
 Menus 17 >> Press `4` >> Members of ScanList 4 <br><br>
 ![Menus 17 >> Press 4 >> Members of ScanList 4](images/Aubs_Menu_ScanLists05_List4a.png)<br><br>
 
-Menus 17 >> Press `7` >> Members of ScanList 1 <br><br>
+Menus 17 >> Press `7` >> Members of ScanList 7 <br><br>
 ![Menus 17 >> Press 7 >> Members of ScanList 7](images/Aubs_Menu_ScanLists06_List7a.png)<br><br>
 
 
