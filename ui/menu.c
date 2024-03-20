@@ -54,14 +54,13 @@ const t_menu_item MenuList[] =
 	{"BusyCL", VOICE_ID_BUSY_LOCKOUT,                  MENU_BCL           }, // was "BCL"
 	{"Compnd", VOICE_ID_INVALID,                       MENU_COMPAND       },
 	{"Demodu", VOICE_ID_INVALID,                       MENU_AM            }, // was "AM"
-	{"ScnAdd", VOICE_ID_INVALID,                       MENU_S_ADD         },
-	{"ScnLkO", VOICE_ID_INVALID,                       MENU_SCN_LOCKOUT   },
-	{"ScnSrt", VOICE_ID_INVALID,                       MENU_SCN_START     },
+	{"ScnAdd", VOICE_ID_INVALID,                       MENU_S_ADD         }, // Add channel to ScanList
+	{"ScnLkO", VOICE_ID_INVALID,                       MENU_SCN_LOCKOUT   }, // Channel locked out from ScanLists
+	{"ScnSrt", VOICE_ID_INVALID,                       MENU_SCN_START     }, // Start scanning on boot
+	{"SLists", VOICE_ID_INVALID,                       MENU_SLISTS        }, // List of ScanLists
 	{"ChSave", VOICE_ID_MEMORY_CHANNEL,                MENU_MEM_CH        }, // was "MEM-CH"
 	{"ChDele", VOICE_ID_DELETE_CHANNEL,                MENU_DEL_CH        }, // was "DEL-CH"
 	{"ChName", VOICE_ID_INVALID,                       MENU_MEM_NAME      },
-
-	{"SLists", VOICE_ID_INVALID,                       MENU_SLISTS        },
 	{"ScnRev", VOICE_ID_INVALID,                       MENU_SC_REV        },
 #ifdef ENABLE_NOAA
 	{"NOAA-S", VOICE_ID_INVALID,                       MENU_NOAA_S        },

@@ -89,7 +89,7 @@ The scanner can be set to temporarily exclude (temp lockout/skip) channels from 
 
 ## Review ScanList Members
 1. Press the `Menu` button
-2. Navigate to item 20 `SLists`
+2. Navigate to item 17 `SLists`
 3. Press the `Menu` button to step into the list
 4. Press `Up`/`Down` to scroll through all channels
 5. Press keys `0`..`9` to switch between each ScanList
@@ -152,6 +152,11 @@ Tidied up the menu by replacing `ScanList0`..`ScanList9` with `ScanLists`, switc
 </li>
 <li>
 
+Moved `SLists` to Menu item 17
+
+</li>
+<li>
+
 A few bits of refractoring to reduce compiled code size
 
 </li>
@@ -164,18 +169,42 @@ A few bits of refractoring to reduce compiled code size
 <br><br>
 
 # Photos
-Scanning List 2 (Lists 2,3,4,5,6,7 enabled)<br><br>
-![Scanning List 2 (Lists 2,3,4,5,6,7 enabled)](images/Aubs_Scan_List2.png)<br><br>
-Scanning List 4 (Lists 2,3,4,5,6,7 enabled)<br><br>
-![Scanning List 4 (Lists 2,3,4,5,6,7 enabled)](images/Aubs_Scan_List4.png)<br><br>
+Scanning ScanLists 2,3,4,5,6,7, List 2 active<br><br>
+![Scanning ScanLists 2,3,4,5,6,7, List 2 active](images/Aubs_Scan_List2.png)<br><br>
+Scanning ScanLists 2,3,4,5,6,7, List 4 active<br><br>
+![Scanning ScanLists 2,3,4,5,6,7, List 4 active](images/Aubs_Scan_List4.png)<br><br>
+
 Menu 14 >> Show ScanLists this channel is a member of<br><br>
-![Menu 14 >> Show ScanLists this channel is a member of](images/Aubs_Menu14_ScanList.png)<br><br>
-Menu 14 >> Editing the ScanLists this channel is a member of<br><br>
-![Menu 14 >> Editing the ScanLists this channel is a member of](images/Aubs_Menu14_ScanList_Edit.png)<br><br>
-Menu 15 >> If this channel is locked out of scanning<br><br>
-![Menu 15 >> If this channel is locked out of scanning](images/Aubs_Menu15_ScanLock_Off.png)<br><br>
-Menu 16 >> If Scan on Start is enabled or disabled<br><br>
-![Menu 16 >> If Scan on Start is enabled or disabled](images/Aubs_Menu16_ScanOnStart.png)<br><br>
+![ScanLists this channel is a member of](images/Aubs_Menu_ScanAdd01_View.png)<br><br>
+Menu 14 >> Editing the ScanLists this channel is a member of (added 7)<br><br>
+![Added ScanList 7 to the existing ScanLists this channel is a member of](images/Aubs_Menu_ScanAdd02_Edit.png)<br><br>
+Menu 14 >> Saved the ScanLists this channel is a member of<br><br>
+![Saved the ScanLists this channel is a member of](images/Aubs_Menu_ScanAdd03_Saved.png)<br><br>
+Menu 15 >> Is this channel locked out of scanning<br><br>
+![Is this channel locked out of scanning](images/Aubs_Menu_ScanLockOut01.png)<br><br>
+Menu 16 >> Is Scan on Start enabled or disabled<br><br>
+![Is Scan on Start enabled or disabled](images/Aubs_Menu_ScanOnStart01.png)<br><br>
+
+Menus 17 >> List all channels or for each ScanList<br><br>
+![ List all channels for each ScanList](images/Aubs_Menu_ScanLists01.png)<br><br>
+Menus 17 >> Default to list all channels (ScanLists the channel is in at the bottom)<br><br>
+![Default to list all channels (ScanLists the channel is in at the bottom)](images/Aubs_Menu_ScanLists02_All.png)<br><br>
+
+Menus 17 >> Press `1` >> Members of ScanList 1 >> Press `Up` for next<br><br>
+![Menus 17 >> Press 1 >> Members of ScanList 1](images/Aubs_Menu_ScanLists03_List1a.png)
+![Menus 17 >> Press 1 >> Members of ScanList 1 >> Press Up for next](images/Aubs_Menu_ScanLists04_List1b.png)<br><br>
+
+Menus 17 >> Press `4` >> Members of ScanList 4 <br><br>
+![Menus 17 >> Press 4 >> Members of ScanList 4](images/Aubs_Menu_ScanLists05_List4a.png)<br><br>
+
+Menus 17 >> Press `7` >> Members of ScanList 1 <br><br>
+![Menus 17 >> Press 7 >> Members of ScanList 7](images/Aubs_Menu_ScanLists06_List7a.png)<br><br>
+
+
+
+
+
+
 Menus 20 to 29 list all channels in each ScanList<br><br>
 ![Menus 20 to 29 list all channels in each ScanList](images/Aubs_Menu20-29_ScanList_Members.png)<br><br>
 Menu 22 >> Listing members of ScanList2 (first)<br><br>
