@@ -51,8 +51,8 @@ NOTE: This README has only barely been updated from the original Egzumer version
 3. The ScanLists will now be shown along the top of the screen
     * If a ScanList is disabled, it will show as an underscore (_) 
     * If a ScanList is enabled, it will show as an:
-    * Asterisk (*) if it is not the active ScanList
-    * Number (0-9) if it is the active ScanList
+        * Asterisk (*) if it is not the active ScanList
+        * Number (0-9) if it is the active ScanList
 5. Toggle each ScanList by pressing the corresponding number `1`..`9` (e.g. while scanning, to turn ScanList 1 on, press `1`, to turn ScanList 1 off, press `1` again)
 ### Note
 * The LED will flash green once when a ScanList is turned on
