@@ -11,7 +11,7 @@ NOTE: This README has only barely been updated from the original Egzumer version
 <br><br>
 
 > [!IMPORTANT]
-> For first use, I would highly recommend taking (and saving) a backup of your exsting radio configuration through the official [CHIRP release](https://chirp.danplanet.com/projects/chirp/wiki/Download), using whatever firmware currently flashed.
+> For first use, I would highly recommend taking (and saving) a backup of your existing radio configuration through the official [CHIRP release](https://chirp.danplanet.com/projects/chirp/wiki/Download), using whatever firmware currently flashed.
 > 1. Once you have that, flash this firmware - See [Releases](https://github.com/AubsUK/uv-k5-firmware-custom/releases)
 > 2. Perform a factory reset (hold `PTT` + `SIDE BUTTON 1` while turning on the radio >> Menu 77 `Reset` >> `ALL`) to clear some EEPROM locations that other firmware configures slightly differently
 > 3. Use CHIRP with [Aubs UV-K5 CHIRP Driver](https://github.com/AubsUK/uvk5-chirp-driver) to read from radio
