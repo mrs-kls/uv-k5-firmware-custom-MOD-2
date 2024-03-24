@@ -179,5 +179,6 @@ uint8_t UI_MENU_GetMenuIdx(uint8_t id);
 char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar);	// declaration, function in ui/menu.c
 void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu);		// declaration, function in ui/menu.c
 void UI_PopulateScanListView(char *String,int32_t gSubMenuSelection,uint8_t menu_item_x1,uint8_t menu_item_x2);
+extern uint8_t currentScanList;
 
 #endif

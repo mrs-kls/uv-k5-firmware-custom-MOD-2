@@ -988,12 +988,16 @@ void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu)
 	}
 	/*
 	 * menu_list_width = 6;
-	 * menu_item_x1    = (8 * menu_list_width) + 2;	== (8*6)+2	= 48
+	 * menu_item_x1    = (8 * menu_list_width) + 2;	== (8*6)+2	= 50
 	 * int menu_item_x2    = LCD_WIDTH - 1;			== 128-1	= 127
 	 */
 	if (ChannelOrScanListMemu)
 	{
-		UI_PrintString(listText, 48, 127, 2, 8);					    // Print or re-print the list to screen in the menu
+		UI_PrintString(listText, 50, 127, 2, 8);					    // Print or re-print the list to screen in the menu
+/*  // Used for testing lockouts.  When viewing Menu 14, shows "LO" (Lockout) or "TLO" (TempLockout) or "" (Not Lockedout) and "Valid" or "NotValid" for the current channel on the current ScanList running (start scan first)
+		sprintf(listText, "%s%s", (gMR_ChannelLists[ChannelNumberToUse].ScanListLockout ? "LO-" : (gMR_ChannelLists[ChannelNumberToUse].ScanListTempLockout ? "TLO-" : "")), (RADIO_CheckValidChannel(ChannelNumberToUse, currentScanList) ? "Valid" : "NValid"));
+		UI_PrintStringSmallNormal(listText, 50, 127, 0);
+ */
 	}
 	else
 	{

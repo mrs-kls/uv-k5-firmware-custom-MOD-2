@@ -164,6 +164,24 @@ A few bits of refractoring to reduce compiled code size
 </td>
 <td>2024-03-20T22:41:24Z</td>
 </tr>
+<tr>
+<td>v00.04</td>
+<td>
+<ul>
+<li>
+
+Fixed ScanList with no channels
+
+</li>
+<li>
+
+Fixed scanning where the last channel in the ScanList is locked out
+
+</li>
+</ul>
+</td>
+<td>TBC</td>
+</tr>
 </table>
 
 <br><br>

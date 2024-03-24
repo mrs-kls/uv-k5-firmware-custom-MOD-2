@@ -60,7 +60,6 @@ const char gModulationStr[MODULATION_UKNOWN][4] = {
 // Check if the we're on a valid channel.  Set ScanList to 10 to ignore the scanlist being checked.
 bool RADIO_CheckValidChannel(uint16_t channel, uint8_t ScanList)
 {
-	(void)ScanList;
 	if (!IS_MR_CHANNEL(channel)) {
 		return false;
 	}
@@ -74,8 +73,8 @@ bool RADIO_CheckValidChannel(uint16_t channel, uint8_t ScanList)
 		return true;
 	}
 	else { // Checking the ScanList
-		// Make sure the channel is in the ScanList and it's not locked out (full or temp)
-		if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout && !gMR_ChannelLists[channel].ScanListTempLockout) {
+		// Make sure the channel is in the ScanList and it's not locked out
+		if (ScanList_CheckValidChannel(channel,ScanList)) {
 			return true;
 		}
 	}

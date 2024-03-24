@@ -277,6 +277,9 @@ unsigned long StrToUL(const char * str)
 	return ul;
 }
 
+
+
+
 // Get the first or last channel numerically in the specified list. For FirstOrLast, use 1 for first, or -1 for last
 uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
 {
@@ -286,10 +289,24 @@ uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
 			First_Last_Chan_Val += FirstOrLast
 		) // Loop through all possible channels
 	{
-		if (gMR_ChannelLists[First_Last_Chan_Val].ScanList[CurList]) // We only need to look at the array item listed
-		{
+		if (ScanList_CheckValidChannel(First_Last_Chan_Val,CurList)) {
 			return First_Last_Chan_Val; // Match found, return it
 		} 
 	}
 	return 0xFF; // No channels returned
 }
+
+
+
+
+// Check if a channel is part of a ScanList and if it is permanently/temporarily locked out
+bool ScanList_CheckValidChannel(uint8_t channel, uint8_t ScanList)
+{
+	//  Channel is a member of the ScanList             Channel is not permanently locked out         Channel is not temp locked out
+	if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout && !gMR_ChannelLists[channel].ScanListTempLockout)
+	{
+		return true;
+	}
+	return false;
+}
+

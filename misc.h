@@ -335,5 +335,6 @@ void FUNCTION_NOP();
 
 inline bool SerialConfigInProgress() { return gSerialConfigCountDown_500ms != 0; }
 uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast);
+bool ScanList_CheckValidChannel(uint8_t channel, uint8_t ScanList);
 
 #endif
