@@ -447,10 +447,11 @@ void SETTINGS_FetchChannelName(char *s, const int channel)
 void SETTINGS_FactoryReset(bool bIsAll)
 {
 	uint16_t i;
-	uint8_t  TemplateA[8];
-	uint8_t  TemplateB[8];
-	memset(TemplateA, 0xFF, sizeof(TemplateA)); // Template to reset to 1
-	memset(TemplateB, 0x00, sizeof(TemplateB)); // Template to reset to 0 (default ScanLists for channels to off)
+	uint8_t  TemplateOnes[8];
+	uint8_t  TemplateOneZeros[8];
+	memset(TemplateOnes, 0xFF, sizeof(TemplateOnes));	// Template to reset to 1
+	memset(TemplateOneZeros, 0xFF, sizeof(TemplateOneZeros) - 6);	// Set the first two bytes to 1's (needed for the first two bytes which are part of the Channel Name)
+	memset(TemplateOneZeros + 2, 0x00, sizeof(TemplateOneZeros) - 2); // Then Set all but the first two bytes to 0's (default ScanLists for channels to off)
 
 	for (i = 0x0C80; i < 0x1E00; i += 8)
 	{
@@ -479,10 +480,13 @@ void SETTINGS_FactoryReset(bool bIsAll)
 		{
 			continue;
 		}
-		// If we're in the second half of the 'Memory Name' location, set all bits to 0
-		if (i >= 0x0F50 && i < 0x1C00) { EEPROM_WriteBuffer(i, TemplateB);  }
-		// Otherwise, set all bits to 1
-		else { EEPROM_WriteBuffer(i, TemplateA); }
+		// Write 8 bytes to 1s
+		EEPROM_WriteBuffer(i, TemplateOnes);
+		// If we're in the 'Memory Name' location, increment the loop counter by 8 and set the second half bytes to 1's for first two and 0's for the remaining (for the ScanList locations)
+		if (i >= 0x0F50 && i < 0x1C00) {
+			i += 8;
+			EEPROM_WriteBuffer(i, TemplateOneZeros);
+		}
 	}
 
 	if (bIsAll)

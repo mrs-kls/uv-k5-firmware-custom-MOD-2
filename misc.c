@@ -282,7 +282,7 @@ uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
 {
 	for (
 			uint8_t First_Last_Chan_Val = (FirstOrLast == 1) ? MR_CHANNEL_FIRST : MR_CHANNEL_LAST;
-			First_Last_Chan_Val <= MR_CHANNEL_LAST;
+			First_Last_Chan_Val <= MR_CHANNEL_LAST; // when in countdown, if it gets to 0 and goes down one more, the uint8_t rolls round to 255
 			First_Last_Chan_Val += FirstOrLast
 		) // Loop through all possible channels
 	{

@@ -974,11 +974,9 @@ inline char UI_ConvertintToChar(uint8_t num, char OutOfRangeReturnChar) {
 void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu)
 {
 	uint32_t ChannelNumberToUse;
-	if (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_SLISTS) { // Check if we're in the submenu for MENU_SLISTS, if so set the channel number to be the currently selected one, otherwise set it to the current active channel in the VFO
-		ChannelNumberToUse = gSubMenuSelection;
-	} else {
-		ChannelNumberToUse = gTxVfo->CHANNEL_SAVE;
-	}
+	// Check if we're in the submenu for MENU_SLISTS, if so set the channel number to be the currently selected one, otherwise set it to the current active channel in the VFO
+	ChannelNumberToUse = (gIsInSubMenu && UI_MENU_GetCurrentMenuId() == MENU_SLISTS) ? gSubMenuSelection : gTxVfo->CHANNEL_SAVE;
+
 	char listText[11];
 	memset(listText, '\0', sizeof(listText));					    // Set everything in the listText array to zeros
 	for (uint8_t i = 0; i < 10; ++i) {
@@ -999,7 +997,6 @@ void UI_GetScanListInfoForChannel(bool ChannelOrScanListMemu)
 	}
 	else
 	{
-
 		// copied from elsewhere
 		const unsigned int menu_list_width = 6; // max no. of characters on the menu list (left side)
 		const unsigned int menu_item_x1    = (8 * menu_list_width) + 2;

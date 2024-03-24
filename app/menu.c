@@ -1223,10 +1223,8 @@ static void MENU_Key_0_to_9(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 	{ // Currently on the list of channels in each ScanList, key pressed to show that list
 		Menu_SelectedScanList = Key;
 		uint8_t Channel;
-		Channel = CURRENT_LIST_FIRST_or_LAST_CHANNEL(Menu_SelectedScanList,1);  // List changed (or reset), so get the first channel in the List
-		if (Channel != 0xFF) {
-			gSubMenuSelection = Channel;
-		}
+		Channel = RADIO_FindNextChannel(MR_CHANNEL_FIRST,SCAN_FWD,Menu_SelectedScanList); // Selected ScanList changed so get the first channel in the new ScanList (if already on the same ScanList, it'll reset to the first channel)
+		gSubMenuSelection = Channel;  // Return the channel number, even if it is 0xFF as it'll be handled later
 		gRequestDisplayScreen = DISPLAY_MENU;
 		return;
 	}
@@ -1448,7 +1446,7 @@ static void MENU_Key_MENU(const bool bKeyPressed, const bool bKeyHeld)
 		#endif
 
 		if(UI_MENU_GetCurrentMenuId() == MENU_SLISTS) {
-			gSubMenuSelection = 0;
+			gSubMenuSelection = RADIO_FindNextChannel(MR_CHANNEL_FIRST,SCAN_FWD,Menu_SelectedScanList); // Entering the list view, so show first channel in the selected list (or ALL if none previously selected)
 		}
 		gAskForConfirmation = 0;
 		gIsInSubMenu        = true;
