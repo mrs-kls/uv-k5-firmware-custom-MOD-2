@@ -147,7 +147,7 @@ Moved flashing of LED into the `FlashLED` function
 <ul>
 <li>
 
-Tidied up the menu by replacing `ScanList0`..`ScanList9` with `ScanLists`, switch between each using numbers on the keypad
+Tidied up the menu by replacing `ScanList0`..`ScanList9` with `SLists`, switch between each using numbers on the keypad
 
 </li>
 <li>
