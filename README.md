@@ -194,7 +194,7 @@ If the radio is tuned to a channel and the active ScanList is turned off, the ra
 </li>
 </ul>
 </td>
-<td>TBC</td>
+<td>2024-03-27T22:11:47Z</td>
 </tr>
 </table>
 
