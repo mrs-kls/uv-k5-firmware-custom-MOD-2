@@ -184,7 +184,7 @@ Fixed scanning where the last channel in the ScanList is locked out
 <td>2024-03-24T22:33:22Z</td>
 </tr>
 <tr>
-<td>v00.04</td>
+<td>v00.05</td>
 <td>
 <ul>
 <li>
