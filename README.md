@@ -60,6 +60,7 @@ NOTE: This README has only barely been updated from the original Egzumer version
 * (as previous) to cancel scanning, press EXIT
 * (as previous) when stopped on an active channel, press Menu to stop scanning and stay on the channel
 * (as previous) to change direction, press up / down
+* If the radio is tuned to a channel and the active ScanList is turned off, the radio will continue scanning
 
 ## Lockouts
 The scanner can be set to permanently exclude (lockout/skip) channels from all lists
@@ -176,6 +177,19 @@ Fixed ScanList with no channels
 <li>
 
 Fixed scanning where the last channel in the ScanList is locked out
+
+</li>
+</ul>
+</td>
+<td>2024-03-24T22:33:22Z</td>
+</tr>
+<tr>
+<td>v00.04</td>
+<td>
+<ul>
+<li>
+
+If the radio is tuned to a channel and the active ScanList is turned off, the radio will continue scanning
 
 </li>
 </ul>

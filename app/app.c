@@ -1719,6 +1719,11 @@ static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 		gEeprom.SCAN_LISTS[Key] = !gEeprom.SCAN_LISTS[Key];
 		SETTINGS_SaveActiveScanLists();
 		FlashLED(1,gEeprom.SCAN_LISTS[Key]);
+		//  Current ScanList has been disabled and current Channel is in the ScanList
+		if (!gEeprom.SCAN_LISTS[Key] && gMR_ChannelLists[gNextMrChannel].ScanList[Key])
+		{
+			CHFRSCANNER_ContinueScanning(); // Continue scanning
+		}
 		return;
 	}
 
