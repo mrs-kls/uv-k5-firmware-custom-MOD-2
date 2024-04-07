@@ -139,7 +139,7 @@ void UI_DisplayStatus()
 	x += sizeof(BITMAP_VOX) + 1;
 #endif
 
-	x = MAX(x1, 61u);
+	x = MAX(x1, 71u);
 
 	// KEY-LOCK indicator
 	if (gEeprom.KEY_LOCK) {

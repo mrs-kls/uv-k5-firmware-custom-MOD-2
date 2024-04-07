@@ -71,6 +71,7 @@
 #include "ui/menu.h"
 #include "ui/status.h"
 #include "ui/ui.h"
+#include "app/common.h"
 
 static bool flagSaveVfo;
 static bool flagSaveSettings;
@@ -1576,6 +1577,16 @@ static void ALARM_Off(void)
 
 static void ProcessKey(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 {
+
+	if (Key == KEY_F && bKeyPressed && bKeyHeld && gScanStateDir != SCAN_OFF) { // Function/Key-Lock is pressed and held, scanner is scanning
+		// Toggle the Keypad lock to unlock
+		COMMON_KeypadLockToggle();
+		return;
+	}
+	if (Key == KEY_EXIT && gKeypadLocked > 0) { // Keypad is locked and the warning is displayed. If it's the Exit key being pressed, remove the warning
+		gKeypadLocked = 0;
+		gUpdateDisplay = true;
+	}
 	if (Key == KEY_EXIT && !BACKLIGHT_IsOn() && gEeprom.BACKLIGHT_TIME > 0)
 	{	// just turn the light on for now so the user can see what's what
 		BACKLIGHT_TurnOn();
