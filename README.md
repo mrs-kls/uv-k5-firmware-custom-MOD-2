@@ -207,17 +207,17 @@ If the radio is tuned to a channel and the active ScanList is turned off, the ra
 <ul>
 <li>
 
-Enabled Keylock funciton when scanning
+Enabled Keylock function when scanning
 
 </li>
 <li>
 
-Moved Keylock padlock over to sit after the Scanlists
+Moved Keylock padlock over to sit after the ScanLists
 
 </li>
 </ul>
 </td>
-<td>TBC</td>
+<td>2024-04-08T21:32:29Z</td>
 </tr>
 
 
