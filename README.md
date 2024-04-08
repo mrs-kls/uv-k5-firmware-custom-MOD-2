@@ -124,6 +124,7 @@ Initial Release
 </td>
 <td>2024-03-16T22:27:38Z</td>
 </tr>
+
 <tr>
 <td>v00.02</td>
 <td>
@@ -142,6 +143,7 @@ Moved flashing of LED into the `FlashLED` function
 </td>
 <td>2024-03-17T02:02:52Z</td>
 </tr>
+
 <tr>
 <td>v00.03</td>
 <td>
@@ -165,6 +167,7 @@ A few bits of refractoring to reduce compiled code size
 </td>
 <td>2024-03-20T22:41:24Z</td>
 </tr>
+
 <tr>
 <td>v00.04</td>
 <td>
@@ -183,6 +186,7 @@ Fixed scanning where the last channel in the ScanList is locked out
 </td>
 <td>2024-03-24T22:33:22Z</td>
 </tr>
+
 <tr>
 <td>v00.05</td>
 <td>
@@ -196,6 +200,28 @@ If the radio is tuned to a channel and the active ScanList is turned off, the ra
 </td>
 <td>2024-03-27T22:11:47Z</td>
 </tr>
+
+<tr>
+<td>v00.06</td>
+<td>
+<ul>
+<li>
+
+Enabled Keylock funciton when scanning
+
+</li>
+<li>
+
+Moved Keylock padlock over to sit after the Scanlists
+
+</li>
+</ul>
+</td>
+<td>TBC</td>
+</tr>
+
+
+
 </table>
 
 <br><br>
