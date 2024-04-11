@@ -221,6 +221,22 @@ Moved Keylock padlock over to sit after the ScanLists
 </tr>
 
 
+<tr>
+<td>v00.07</td>
+<td>
+<ul>
+<li>
+
+Fixed bug where deleted channel memory is still being considered in the ScanList range causing it to stick on that ScanList. Raised by @121tech in https://github.com/AubsUK/uv-k5-firmware-custom/issues/22
+
+</li>
+</ul>
+</td>
+<td>TBC</td>
+</tr>
+
+
+
 
 </table>
 
