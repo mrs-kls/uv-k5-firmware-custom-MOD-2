@@ -289,7 +289,7 @@ uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
 			First_Last_Chan_Val += FirstOrLast
 		) // Loop through all possible channels
 	{
-		if (ScanList_CheckValidChannel(First_Last_Chan_Val,CurList)) {
+		if (RADIO_CheckValidChannel(First_Last_Chan_Val,CurList)) {
 			return First_Last_Chan_Val; // Match found, return it
 		} 
 	}
@@ -300,10 +300,16 @@ uint8_t CURRENT_LIST_FIRST_or_LAST_CHANNEL(uint8_t CurList, int8_t FirstOrLast)
 
 
 // Check if a channel is part of a ScanList and if it is permanently/temporarily locked out
-bool ScanList_CheckValidChannel(uint8_t channel, uint8_t ScanList)
+bool ScanList_CheckValidChannel(uint8_t Channel, uint8_t ScanList)
 {
-	//  Channel is a member of the ScanList             Channel is not permanently locked out         Channel is not temp locked out
-	if (gMR_ChannelLists[channel].ScanList[ScanList] && !gMR_ChannelLists[channel].ScanListLockout && !gMR_ChannelLists[channel].ScanListTempLockout)
+	
+	if (
+			gMR_ChannelLists[Channel].ScanList[ScanList] //  Channel is a member of the ScanList
+			&&
+			!gMR_ChannelLists[Channel].ScanListLockout // Channel is not permanently locked out
+			&&
+			!gMR_ChannelLists[Channel].ScanListTempLockout // Channel is not temp locked out
+		)
 	{
 		return true;
 	}
