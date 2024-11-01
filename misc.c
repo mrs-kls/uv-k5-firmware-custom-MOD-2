@@ -60,7 +60,11 @@ const uint16_t    scan_pause_delay_in_3_10ms       =   200 / 10;   // 200ms
 const uint16_t    scan_pause_delay_in_4_10ms       =   300 / 10;   // 300ms
 const uint16_t    scan_pause_delay_in_5_10ms       =  1000 / 10;   // 1 sec
 const uint16_t    scan_pause_delay_in_6_10ms       =   100 / 10;   // 100ms
-const uint16_t    scan_pause_delay_in_7_10ms       =  3600 / 10;   // 3.6 seconds
+
+//DmVk
+// const uint16_t    scan_pause_delay_in_7_10ms       =  3600 / 10;   // 3.6 seconds
+const uint16_t    scan_pause_delay_in_7_10ms       =  6000 / 10;   // 6 seconds
+//DmVk
 
 const uint16_t    battery_save_count_10ms          = 10000 / 10;   // 10 seconds
 
